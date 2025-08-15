@@ -1337,6 +1337,16 @@ async function saveCadreInfo() {
       cadreToSave.party_entry_date = formatDate(cadreToSave.party_entry_date);
     }
     
+    // 确保数字字段被正确处理
+    if (cadreToSave.probation_period !== null && cadreToSave.probation_period !== undefined) {
+      cadreToSave.probation_period = cadreToSave.probation_period.toString();
+    } else {
+      cadreToSave.probation_period = null;
+    }
+    
+    // 其他数字字段保持原样，因为后端期望的是数字类型
+    // age, company_tenure, work_tenure 在后端是数字类型，不需要转换为字符串
+    
     if (cadreToSave.id) {
       // 更新现有记录
       await invoke("update_cadre_info", { cadre: cadreToSave });
@@ -1347,6 +1357,7 @@ async function saveCadreInfo() {
     closeModal();
     loadCadreInfo();
   } catch (error) {
+    console.error("保存干部信息失败:", error);
     if (error.name === 'ValidationError') {
       console.error("表单验证失败:", error);
     } else {
