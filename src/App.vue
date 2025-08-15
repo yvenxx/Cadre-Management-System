@@ -31,24 +31,13 @@
       <div v-if="activeTab === 'cadre-list'" class="content-section">
         <div class="section-header">
           <h2>管理人员信息表</h2>
-          <div class="header-actions">
-            <button class="btn-primary" @click="openAddModal">
-              <i>➕</i> 新增
-            </button>
-            <button class="btn-secondary" @click="exportSelectedCadres">
-              <i>📤</i> 导出选中
-            </button>
-            <button class="btn-secondary" @click="exportAllCadres">
-              <i>📤</i> 导出全部
-            </button>
-          </div>
         </div>
         
         <!-- 筛选条件面板 -->
         <div class="filter-panel">
           <div class="filter-header">
             <h3>筛选条件</h3>
-            <el-button @click="toggleFilterPanel" size="small">
+            <el-button @click="toggleFilterPanel" size="small" class="toggle-filter-button">
               {{ showFilterPanel ? '收起' : '展开' }}
             </el-button>
           </div>
@@ -103,7 +92,6 @@
                     <el-option label="中共党员" value="中共党员" />
                     <el-option label="预备党员" value="预备党员" />
                     <el-option label="共青团员" value="共青团员" />
-                    <el-option label="群众" value="群众" />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -334,7 +322,7 @@
           </div>
         </div>
         
-        <!-- 导出按钮组 -->
+        <!-- 操作按钮组 -->
         <div class="export-buttons-container">
           <div class="export-buttons-info">
             <span class="export-count-info">
@@ -342,6 +330,9 @@
             </span>
           </div>
           <div class="export-buttons-group">
+            <button class="btn-primary" @click="openAddModal">
+              <i>➕</i> 新增
+            </button>
             <button class="btn-export btn-export-selected" @click="exportSelectedCadres">
               <i>📤</i> 导出选中
             </button>
@@ -3002,6 +2993,26 @@ html, body {
   box-shadow: var(--card-shadow);
   margin-bottom: 20px;
   border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 筛选条件展开/收起按钮样式优化 */
+.toggle-filter-button {
+  padding: 12px 24px !important; /* 增大内边距 */
+  font-size: 1.1rem !important; /* 增大字体 */
+  min-height: 44px !important; /* 设置最小高度 */
+  border-radius: 10px !important; /* 增大圆角 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; /* 添加过渡动画 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; /* 添加阴影 */
+}
+
+.toggle-filter-button:hover {
+  transform: translateY(-2px) !important; /* 悬停时上移 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important; /* 悬停时增强阴影 */
+}
+
+.toggle-filter-button:active {
+  transform: translateY(0) !important; /* 点击时恢复原位 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* 点击时减弱阴影 */
 }
 
 .filter-header {
