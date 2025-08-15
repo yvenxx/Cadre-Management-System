@@ -540,7 +540,7 @@
             ref="cadreFormRef"
             :model="currentCadre"
             :rules="formRules"
-            label-width="120px"
+            label-position="top"
             size="default"
             @submit.prevent="saveCadreInfo"
           >
@@ -580,6 +580,7 @@
                       value-format="YYYY-MM-DD"
                       disabled
                       clearable
+                      style="width: 100%"
                     />
                   </el-form-item>
                 </el-col>
@@ -619,197 +620,218 @@
             <!-- 工作信息 -->
             <div class="form-section">
               <h4 class="form-section-title">工作信息</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-department">部门</label>
-                  <el-select id="modal-department" v-model="currentCadre.department" placeholder="请选择或输入部门名称" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in departmentOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-                <div class="form-group">
-                  <label for="modal-section">科室</label>
-                  <el-input id="modal-section" v-model="currentCadre.section" placeholder="请输入科室名称" clearable />
-                </div>
-                <div class="form-group">
-                  <label for="modal-position1">职务1</label>
-                  <el-select id="modal-position1" v-model="currentCadre.position1" placeholder="请选择或输入职务" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in positionOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="部门">
+                    <el-select v-model="currentCadre.department" placeholder="请选择或输入部门名称" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in departmentOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="科室">
+                    <el-input v-model="currentCadre.section" placeholder="请输入科室名称" clearable />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="职务1">
+                    <el-select v-model="currentCadre.position1" placeholder="请选择或输入职务" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in positionOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
               
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-position2">职务2</label>
-                  <el-input id="modal-position2" v-model="currentCadre.position2" placeholder="请输入职务2" clearable />
-                </div>
-                <div class="form-group">
-                  <label for="modal-companyEntryDate">入司日期</label>
-                  <el-date-picker 
-                    id="modal-companyEntryDate"
-                    v-model="currentCadre.company_entry_date" 
-                    type="date"
-                    placeholder="请选择日期"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    @change="calculateCompanyTenure"
-                    clearable
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="modal-companyTenure">司龄（年）</label>
-                  <el-input id="modal-companyTenure" v-model="currentCadre.company_tenure" placeholder="自动计算" disabled />
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="职务2">
+                    <el-input v-model="currentCadre.position2" placeholder="请输入职务2" clearable />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="入司日期">
+                    <el-date-picker 
+                      v-model="currentCadre.company_entry_date" 
+                      type="date"
+                      placeholder="请选择日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      @change="calculateCompanyTenure"
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="司龄（年）">
+                    <el-input v-model="currentCadre.company_tenure" placeholder="自动计算" disabled />
+                  </el-form-item>
+                </el-col>
+              </el-row>
               
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-workStartDate">参加工作时间</label>
-                  <el-date-picker 
-                    id="modal-workStartDate"
-                    v-model="currentCadre.work_start_date" 
-                    type="date"
-                    placeholder="请选择日期"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    @change="calculateWorkTenure"
-                    clearable
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="modal-workTenure">工龄（年）</label>
-                  <el-input id="modal-workTenure" v-model="currentCadre.work_tenure" placeholder="自动计算" disabled />
-                </div>
-                <div class="form-group">
-                  <label for="modal-currentLevelDate">任现职级时间</label>
-                  <el-date-picker 
-                    id="modal-currentLevelDate"
-                    v-model="currentCadre.current_level_date" 
-                    type="date"
-                    placeholder="请选择日期"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    clearable
-                  />
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="参加工作时间">
+                    <el-date-picker 
+                      v-model="currentCadre.work_start_date" 
+                      type="date"
+                      placeholder="请选择日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      @change="calculateWorkTenure"
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="工龄（年）">
+                    <el-input v-model="currentCadre.work_tenure" placeholder="自动计算" disabled />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="任现职级时间">
+                    <el-date-picker 
+                      v-model="currentCadre.current_level_date" 
+                      type="date"
+                      placeholder="请选择日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
               
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-positionEntryDate">任职时间</label>
-                  <el-date-picker 
-                    id="modal-positionEntryDate"
-                    v-model="currentCadre.position_entry_date" 
-                    type="date"
-                    placeholder="请选择日期"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    @change="calculateProbationEnd"
-                    clearable
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="modal-probationPeriod">试用期（年）</label>
-                  <el-input-number id="modal-probationPeriod" v-model="currentCadre.probation_period" :min="0" :max="10" :step="0.1" @change="calculateProbationEnd" placeholder="请输入试用期" />
-                </div>
-                <div class="form-group">
-                  <label for="modal-probationEndReminder">试用期满到期提醒</label>
-                  <el-date-picker 
-                    id="modal-probationEndReminder"
-                    v-model="currentCadre.probation_end_reminder" 
-                    type="date"
-                    placeholder="自动计算"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    disabled
-                    clearable
-                  />
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="任职时间">
+                    <el-date-picker 
+                      v-model="currentCadre.position_entry_date" 
+                      type="date"
+                      placeholder="请选择日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      @change="calculateProbationEnd"
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="试用期（年）">
+                    <el-input-number v-model="currentCadre.probation_period" :min="0" :max="10" :step="0.1" @change="calculateProbationEnd" placeholder="请输入试用期" controls-position="right" style="width: 100%" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="试用期满到期提醒">
+                    <el-date-picker 
+                      v-model="currentCadre.probation_end_reminder" 
+                      type="date"
+                      placeholder="自动计算"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      disabled
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
             </div>
             
             <!-- 教育背景 -->
             <div class="form-section">
               <h4 class="form-section-title">教育背景</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-education">最高学历</label>
-                  <el-select id="modal-education" v-model="currentCadre.education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-                <div class="form-group">
-                  <label for="modal-fullTimeEducation">全日制学历</label>
-                  <el-select id="modal-fullTimeEducation" v-model="currentCadre.full_time_education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-                <div class="form-group">
-                  <label for="modal-fullTimeSchoolMajor">全日制毕业院校系及专业</label>
-                  <el-input id="modal-fullTimeSchoolMajor" v-model="currentCadre.full_time_school_major" placeholder="请输入毕业院校系及专业" clearable />
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="最高学历">
+                    <el-select v-model="currentCadre.education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="全日制学历">
+                    <el-select v-model="currentCadre.full_time_education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="全日制毕业院校系及专业">
+                    <el-input v-model="currentCadre.full_time_school_major" placeholder="请输入毕业院校系及专业" clearable />
+                  </el-form-item>
+                </el-col>
+              </el-row>
               
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-partTimeEducation">在职学历</label>
-                  <el-select id="modal-partTimeEducation" v-model="currentCadre.part_time_education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-                <div class="form-group">
-                  <label for="modal-partTimeSchoolPhone">在职毕业院校系及专业</label>
-                  <el-input id="modal-partTimeSchoolPhone" v-model="currentCadre.part_time_school_phone" placeholder="请输入在职毕业院校系及专业" clearable />
-                </div>
-                <div class="form-group">
-                  <label for="modal-technicalPosition">专业技术职务</label>
-                  <el-select id="modal-technicalPosition" v-model="currentCadre.technical_position" placeholder="请选择或输入专业技术职务" filterable allow-create default-first-option clearable>
-                    <el-option v-for="option in technicalPositionOptions" :key="option" :label="option" :value="option" />
-                  </el-select>
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="在职学历">
+                    <el-select v-model="currentCadre.part_time_education" placeholder="请选择或输入学历" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in educationOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="在职毕业院校系及专业">
+                    <el-input v-model="currentCadre.part_time_school_phone" placeholder="请输入在职毕业院校系及专业" clearable />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="专业技术职务">
+                    <el-select v-model="currentCadre.technical_position" placeholder="请选择或输入专业技术职务" filterable allow-create default-first-option clearable>
+                      <el-option v-for="option in technicalPositionOptions" :key="option" :label="option" :value="option" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
             </div>
             
             <!-- 政治面貌 -->
             <div class="form-section">
               <h4 class="form-section-title">政治面貌</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="modal-politicalStatus">政治面貌</label>
-                  <el-select id="modal-politicalStatus" v-model="currentCadre.political_status" placeholder="请选择政治面貌" clearable>
-                    <el-option label="" value="" />
-                    <el-option label="中共党员" value="中共党员" />
-                    <el-option label="预备党员" value="预备党员" />
-                    <el-option label="共青团员" value="共青团员" />
-                    <el-option label="民革党员" value="民革党员" />
-                    <el-option label="民盟盟员" value="民盟盟员" />
-                    <el-option label="民建会员" value="民建会员" />
-                    <el-option label="民进会员" value="民进会员" />
-                    <el-option label="农工党党员" value="农工党党员" />
-                    <el-option label="致公党党员" value="致公党党员" />
-                    <el-option label="九三学社社员" value="九三学社社员" />
-                    <el-option label="台盟盟员" value="台盟盟员" />
-                    <el-option label="无党派人士" value="无党派人士" />
-                    <el-option label="群众" value="群众" />
-                  </el-select>
-                </div>
-                <div class="form-group">
-                  <label for="modal-partyEntryDate">入党时间</label>
-                  <el-date-picker 
-                    id="modal-partyEntryDate"
-                    v-model="currentCadre.party_entry_date" 
-                    type="date"
-                    placeholder="请选择日期"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    clearable
-                  />
-                </div>
-                <div class="form-group full-width">
-                  <label for="modal-remarks">备注</label>
-                  <el-input id="modal-remarks" v-model="currentCadre.remarks" type="textarea" :rows="4" placeholder="请输入备注" clearable />
-                </div>
-              </div>
+              <el-row :gutter="20">
+                <el-col :span="8">
+                  <el-form-item label="政治面貌">
+                    <el-select v-model="currentCadre.political_status" placeholder="请选择政治面貌" clearable>
+                      <el-option label="" value="" />
+                      <el-option label="中共党员" value="中共党员" />
+                      <el-option label="预备党员" value="预备党员" />
+                      <el-option label="共青团员" value="共青团员" />
+                      <el-option label="民革党员" value="民革党员" />
+                      <el-option label="民盟盟员" value="民盟盟员" />
+                      <el-option label="民建会员" value="民建会员" />
+                      <el-option label="民进会员" value="民进会员" />
+                      <el-option label="农工党党员" value="农工党党员" />
+                      <el-option label="致公党党员" value="致公党党员" />
+                      <el-option label="九三学社社员" value="九三学社社员" />
+                      <el-option label="台盟盟员" value="台盟盟员" />
+                      <el-option label="无党派人士" value="无党派人士" />
+                      <el-option label="群众" value="群众" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="入党时间">
+                    <el-date-picker 
+                      v-model="currentCadre.party_entry_date" 
+                      type="date"
+                      placeholder="请选择日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      clearable
+                      style="width: 100%"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="备注">
+                    <el-input v-model="currentCadre.remarks" type="textarea" :rows="4" placeholder="请输入备注" clearable />
+                  </el-form-item>
+                </el-col>
+              </el-row>
             </div>
             
             <div class="form-actions">
@@ -2520,54 +2542,6 @@ html, body {
 .form-group textarea:disabled,
 .datepicker-input:disabled,
 :deep(.dp__input_wrap input:disabled) {
-  background-color: #f8fafc !important;
-  color: #64748b !important;
-  cursor: not-allowed !important;
-  opacity: 1 !important;
-  border-color: #e2e8f0 !important;
-}
-
-.form-group input[readonly]:focus,
-.form-group input:disabled:focus,
-.form-group select:disabled:focus,
-.form-group textarea:disabled:focus,
-.datepicker-input:disabled:focus {
-  outline: none !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
-
-/* 特殊处理选择框 */
-.form-group select {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 16px center !important;
-  background-size: 18px !important;
-  padding-right: 45px !important;
-}
-
-/* 特殊处理选择框以保持视觉一致性 */
-.form-group select {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 16px center !important;
-  background-size: 16px !important;
-  padding-right: 40px !important; /* 为下拉箭头留出空间 */
-}
-
-/* 统一的只读样式 */
-.form-group input[readonly],
-.form-group input:disabled,
-.form-group select:disabled,
-.form-group textarea:disabled,
-.datepicker-input:disabled,
-:deep(.dp__input_wrap input:disabled) {
   background-color: #e2e8f0 !important;
   color: #4a5568 !important;
   cursor: not-allowed !important;
@@ -2583,6 +2557,18 @@ html, body {
   outline: none !important;
   border-color: #e2e8f0 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 特殊处理选择框 */
+.form-group select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 16px center !important;
+  background-size: 18px !important;
+  padding-right: 45px !important;
 }
 
 /* 日期选择器悬停样式 */
@@ -2668,25 +2654,6 @@ html, body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.form-group textarea {
-  min-height: 120px;
-  resize: vertical;
-  font-family: inherit;
-}
-
-/* 组合输入框样式 */
-.combobox-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  background-color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* 表格复选框样式 */
