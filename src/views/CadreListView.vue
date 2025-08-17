@@ -440,6 +440,7 @@ function formatDate(date) {
 const showModal = ref(false);
 const showExportModal = ref(false);
 const exportDefaultFileName = ref("干部信息");
+const exportFilteredData = ref(false); // 标识是否导出筛选后的数据
 const selectedCadres = ref([]); // 用于存储选中的干部
 
 // 学历选项
@@ -1214,6 +1215,8 @@ async function exportSelectedCadres() {
   try {
     // 设置默认文件名
     exportDefaultFileName.value = "选中干部信息";
+    // 重置导出筛选数据标识
+    exportFilteredData.value = false;
     // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
@@ -1227,6 +1230,8 @@ async function exportAllCadres() {
   try {
     // 设置默认文件名
     exportDefaultFileName.value = "全部干部信息";
+    // 标识为导出筛选后的数据
+    exportFilteredData.value = true;
     // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
@@ -1253,10 +1258,22 @@ async function performExport(exportData) {
       return;
     }
     
+    // 根据导出类型确定要导出的数据ID列表
+    let cadreIds = exportData.cadreIds; // 默认使用传入的ID列表（选中导出）
+    
+    // 如果是导出筛选后的全部数据且没有选中特定干部
+    if (exportFilteredData.value && !exportData.cadreIds) {
+      // 使用筛选后的数据ID列表
+      cadreIds = filteredCadreList.value.map(cadre => cadre.id);
+    }
+    
+    // 重置导出筛选数据标识
+    exportFilteredData.value = false;
+    
     await invoke("export_cadre_info_to_excel", { 
       filePath, 
       selectedFields: exportData.selectedFields,
-      cadreIds: exportData.cadreIds // 如果为null则导出全部
+      cadreIds // 如果为null则导出全部
     });
     
     closeExportModal();
