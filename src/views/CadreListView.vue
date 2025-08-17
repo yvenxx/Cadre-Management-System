@@ -10,10 +10,16 @@
       <!-- 筛选条件面板 -->
       <div class="filter-panel">
         <div class="filter-header">
-          <h3>筛选条件</h3>
-          <el-button @click="toggleFilterPanel" size="small" class="toggle-filter-button">
-            {{ showFilterPanel ? '收起' : '展开' }}
-          </el-button>
+          <div class="filter-title-container">
+            <h3>筛选条件</h3>
+            <el-button @click="toggleFilterPanel" class="toggle-filter-button">
+              {{ showFilterPanel ? '收起' : '展开' }}
+              <el-icon class="el-icon--right">
+                <ArrowUp v-if="showFilterPanel" />
+                <ArrowDown v-else />
+              </el-icon>
+            </el-button>
+          </div>
         </div>
         <div v-show="showFilterPanel" class="filter-content">
           <el-row :gutter="16">
@@ -401,7 +407,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download } from '@element-plus/icons-vue';
+import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
 
@@ -914,27 +920,90 @@ function editCadre(cadre) {
     cadreCopy.party_entry_date = new Date(cadreCopy.party_entry_date);
   }
   
-  currentCadre.value = cadreCopy;
-  showModal.value = true;
-  
+  // 先进行计算
   // 重新计算司龄和工龄
-  if (currentCadre.value.company_entry_date) {
-    calculateCompanyTenure();
+  if (cadreCopy.company_entry_date) {
+    // 计算司龄
+    const entryDate = cadreCopy.company_entry_date instanceof Date 
+      ? cadreCopy.company_entry_date 
+      : new Date(cadreCopy.company_entry_date);
+    
+    if (!isNaN(entryDate.getTime())) {
+      const today = new Date();
+      const diffTime = Math.abs(today - entryDate);
+      const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+      cadreCopy.company_tenure = parseFloat(diffYears.toFixed(1));
+    } else {
+      cadreCopy.company_tenure = null;
+    }
   }
   
-  if (currentCadre.value.work_start_date) {
-    calculateWorkTenure();
+  if (cadreCopy.work_start_date) {
+    // 计算工龄
+    const startDate = cadreCopy.work_start_date instanceof Date 
+      ? cadreCopy.work_start_date 
+      : new Date(cadreCopy.work_start_date);
+    
+    if (!isNaN(startDate.getTime())) {
+      const today = new Date();
+      const diffTime = Math.abs(today - startDate);
+      const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+      cadreCopy.work_tenure = parseFloat(diffYears.toFixed(1));
+    } else {
+      cadreCopy.work_tenure = null;
+    }
   }
   
   // 重新计算试用期满到期提醒
-  if (currentCadre.value.probation_period && currentCadre.value.position_entry_date) {
-    calculateProbationEnd();
+  if (cadreCopy.probation_period && cadreCopy.position_entry_date) {
+    const positionDate = cadreCopy.position_entry_date instanceof Date 
+      ? cadreCopy.position_entry_date 
+      : new Date(cadreCopy.position_entry_date);
+    
+    if (!isNaN(positionDate.getTime())) {
+      const probationYears = parseFloat(cadreCopy.probation_period);
+      
+      // 计算试用期结束日期
+      const endDate = new Date(positionDate);
+      endDate.setFullYear(endDate.getFullYear() + Math.floor(probationYears));
+      endDate.setMonth(endDate.getMonth() + Math.round((probationYears % 1) * 12));
+      
+      cadreCopy.probation_end_reminder = endDate;
+    }
   }
   
   // 如果有身份证号，重新提取信息
-  if (currentCadre.value.id_number && currentCadre.value.id_number.length === 18) {
-    extractIdInfo();
+  if (cadreCopy.id_number && cadreCopy.id_number.length === 18) {
+    // 提取出生日期和年龄
+    const idNumber = cadreCopy.id_number;
+    const birthYear = idNumber.substring(6, 10);
+    const birthMonth = idNumber.substring(10, 12);
+    const birthDay = idNumber.substring(12, 14);
+    
+    // 创建日期对象
+    const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+    
+    // 检查日期是否有效
+    if (!isNaN(birthDate.getTime())) {
+      cadreCopy.birth_date = birthDate;
+      
+      // 计算年龄
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      // 如果还没过生日，则年龄减1
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      cadreCopy.age = age;
+    }
   }
+  
+  // 设置当前干部信息
+  currentCadre.value = cadreCopy;
+  showModal.value = true;
 }
 
 // 删除干部信息
@@ -1240,19 +1309,13 @@ onMounted(() => {
 }
 
 .content-section {
-  height: 100%;
   background: white;
   border-radius: 16px;
   box-shadow: var(--card-shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.content-section:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--hover-shadow);
+  max-height: calc(100vh - 50px);
 }
 
 .content-section::before {
@@ -1272,6 +1335,42 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #f1f5f9;
+}
+
+.filter-header {
+  margin-bottom: 20px;
+}
+
+.filter-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.filter-title-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.toggle-filter-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  background-color: #409eff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.toggle-filter-button:hover {
+  background-color: #337ecc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 </style>

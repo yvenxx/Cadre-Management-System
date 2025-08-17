@@ -45,7 +45,6 @@
                 type="date"
                 placeholder="自动计算"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 disabled
                 clearable
                 style="width: 100%"
@@ -123,7 +122,6 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 @change="calculateCompanyTenure"
                 clearable
                 style="width: 100%"
@@ -145,7 +143,6 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 @change="calculateWorkTenure"
                 clearable
                 style="width: 100%"
@@ -164,7 +161,6 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 clearable
                 style="width: 100%"
               />
@@ -180,7 +176,6 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 @change="calculateProbationEnd"
                 clearable
                 style="width: 100%"
@@ -199,7 +194,6 @@
                 type="date"
                 placeholder="自动计算"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 disabled
                 clearable
                 style="width: 100%"
@@ -288,7 +282,6 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
                 clearable
                 style="width: 100%"
               />
@@ -296,7 +289,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="备注">
-              <el-input v-model="formData.remarks" type="textarea" :rows="4" placeholder="请输入备注" clearable />
+              <el-input v-model="formData.remarks" placeholder="请输入备注" clearable />
             </el-form-item>
           </el-col>
         </el-row>
@@ -481,26 +474,29 @@ const formData = ref({ ...props.cadre });
 
 // 监听props.cadre变化，更新formData
 watch(() => props.cadre, (newCadre) => {
+  // 直接使用父组件传递的数据，包括已计算的字段
   formData.value = { ...newCadre };
   
-  // 重新计算司龄和工龄
-  if (formData.value.company_entry_date) {
-    calculateCompanyTenure();
-  }
+  // 处理日期字段，确保它们是正确的格式
+  const dateFields = [
+    'company_entry_date',
+    'work_start_date',
+    'current_level_date',
+    'position_entry_date',
+    'probation_end_reminder',
+    'birth_date',
+    'party_entry_date'
+  ];
   
-  if (formData.value.work_start_date) {
-    calculateWorkTenure();
-  }
-  
-  // 重新计算试用期满到期提醒
-  if (formData.value.probation_period && formData.value.position_entry_date) {
-    calculateProbationEnd();
-  }
-  
-  // 如果有身份证号，重新提取信息
-  if (formData.value.id_number && formData.value.id_number.length === 18) {
-    extractIdInfo();
-  }
+  dateFields.forEach(field => {
+    if (formData.value[field] && typeof formData.value[field] === 'string') {
+      // 如果是字符串日期，转换为Date对象
+      const date = new Date(formData.value[field]);
+      if (!isNaN(date.getTime())) {
+        formData.value[field] = date;
+      }
+    }
+  });
 }, { deep: true });
 
 // 日期格式化辅助函数
@@ -537,33 +533,28 @@ async function handleSubmit() {
     const cadreToSave = { ...formData.value };
     
     // 格式化所有日期字段为字符串
-    if (cadreToSave.company_entry_date) {
-      cadreToSave.company_entry_date = formatDate(cadreToSave.company_entry_date);
-    }
+    const dateFields = [
+      'company_entry_date',
+      'work_start_date',
+      'current_level_date',
+      'position_entry_date',
+      'probation_end_reminder',
+      'birth_date',
+      'party_entry_date'
+    ];
     
-    if (cadreToSave.work_start_date) {
-      cadreToSave.work_start_date = formatDate(cadreToSave.work_start_date);
-    }
-    
-    if (cadreToSave.current_level_date) {
-      cadreToSave.current_level_date = formatDate(cadreToSave.current_level_date);
-    }
-    
-    if (cadreToSave.position_entry_date) {
-      cadreToSave.position_entry_date = formatDate(cadreToSave.position_entry_date);
-    }
-    
-    if (cadreToSave.probation_end_reminder) {
-      cadreToSave.probation_end_reminder = formatDate(cadreToSave.probation_end_reminder);
-    }
-    
-    if (cadreToSave.birth_date) {
-      cadreToSave.birth_date = formatDate(cadreToSave.birth_date);
-    }
-    
-    if (cadreToSave.party_entry_date) {
-      cadreToSave.party_entry_date = formatDate(cadreToSave.party_entry_date);
-    }
+    dateFields.forEach(field => {
+      if (cadreToSave[field] instanceof Date) {
+        // 如果是Date对象，格式化为字符串
+        const year = cadreToSave[field].getFullYear();
+        const month = String(cadreToSave[field].getMonth() + 1).padStart(2, '0');
+        const day = String(cadreToSave[field].getDate()).padStart(2, '0');
+        cadreToSave[field] = `${year}-${month}-${day}`;
+      } else if (cadreToSave[field]) {
+        // 如果是字符串，直接使用formatDate函数处理
+        cadreToSave[field] = formatDate(cadreToSave[field]);
+      }
+    });
     
     // 确保数字字段被正确处理
     if (cadreToSave.probation_period !== null && cadreToSave.probation_period !== undefined) {
