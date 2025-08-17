@@ -318,9 +318,9 @@
         row-key="id"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column type="index" label="序号" width="60" />
-        <el-table-column prop="name" label="姓名" width="100" />
+        <el-table-column type="selection" width="55" fixed />
+        <el-table-column type="index" label="序号" width="60" fixed />
+        <el-table-column prop="name" label="姓名" width="100" fixed />
         <el-table-column prop="gender" label="性别" width="60" />
         <el-table-column prop="department" label="部门" width="150" />
         <el-table-column prop="section" label="科室" width="120" />
