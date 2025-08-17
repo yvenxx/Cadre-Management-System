@@ -408,6 +408,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
+import { save } from '@tauri-apps/plugin-dialog';
 import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
@@ -1237,8 +1238,20 @@ async function exportAllCadres() {
 // 执行导出操作
 async function performExport(exportData) {
   try {
-    // 构造文件路径
-    const filePath = `${exportData.fileName}.xlsx`;
+    // 弹出文件保存对话框，让用户选择保存位置
+    const filePath = await save({
+      filters: [{
+        name: 'Excel Files',
+        extensions: ['xlsx']
+      }],
+      defaultPath: `${exportData.fileName}.xlsx`
+    });
+    
+    // 如果用户取消了保存对话框，则不执行导出
+    if (!filePath) {
+      closeExportModal();
+      return;
+    }
     
     await invoke("export_cadre_info_to_excel", { 
       filePath, 
