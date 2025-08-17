@@ -20,10 +20,12 @@
       </el-menu>
     </el-aside>
 
-    <el-main class="main-content">
-      <CadreListView v-if="activeMenu === 'cadre-list'" />
-      <StatisticsView v-else-if="activeMenu === 'statistics'" />
-    </el-main>
+    <el-container>
+      <el-main class="main-content">
+        <CadreListView v-if="activeMenu === 'cadre-list'" />
+        <StatisticsView v-else-if="activeMenu === 'statistics'" />
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
@@ -31,6 +33,7 @@
 import { ref } from 'vue'
 import CadreListView from '../views/CadreListView.vue'
 import StatisticsView from '../views/StatisticsView.vue'
+import Footer from './Footer.vue'
 
 const activeMenu = ref('cadre-list')
 
@@ -78,7 +81,7 @@ const handleMenuSelect = (index) => {
 .main-content {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   padding: 25px;
-  height: calc(100vh - 50px); /* 减去顶部和底部的padding */
+  height: calc(100vh - 50px);
   overflow-y: auto;
 }
 </style>

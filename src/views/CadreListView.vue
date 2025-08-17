@@ -461,6 +461,9 @@
       </el-table>
     </el-card>
     
+    <!-- 页脚 -->
+    <Footer />
+    
     <!-- 新增/编辑弹窗 -->
     <CadreForm 
       v-model="showModal"
@@ -516,6 +519,7 @@ import { save } from '@tauri-apps/plugin-dialog';
 import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
+import Footer from '../components/Footer.vue';
 
 // 日期格式化辅助函数
 function formatDate(date) {

@@ -215,6 +215,9 @@
           </el-card>
         </el-col>
       </el-row>
+      
+      <!-- 页脚 -->
+      <Footer />
     </el-card>
   </div>
 </template>
@@ -222,6 +225,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
+import Footer from '../components/Footer.vue';
 
 // 活动标签页
 const activeTab = ref("gender");
