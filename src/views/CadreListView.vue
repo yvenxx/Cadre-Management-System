@@ -39,12 +39,26 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="部门">
-                <el-input v-model="filters.department" placeholder="请输入部门" clearable :prefix-icon="OfficeBuilding" />
+                <el-select v-model="filters.department" placeholder="请选择部门" clearable filterable>
+                  <el-option
+                    v-for="dept in distinctDepartments"
+                    :key="dept"
+                    :label="dept"
+                    :value="dept"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="科室">
-                <el-input v-model="filters.section" placeholder="请输入科室" clearable :prefix-icon="OfficeBuilding" />
+                <el-select v-model="filters.section" placeholder="请选择科室" clearable filterable>
+                  <el-option
+                    v-for="section in distinctSections"
+                    :key="section"
+                    :label="section"
+                    :value="section"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -52,26 +66,49 @@
           <el-row :gutter="16">
             <el-col :span="6">
               <el-form-item label="职务1">
-                <el-input v-model="filters.position1" placeholder="请输入职务1" clearable prefix-icon="UserFilled" />
+                <el-select v-model="filters.position1" placeholder="请选择职务1" clearable filterable>
+                  <el-option
+                    v-for="position in distinctPositions1"
+                    :key="position"
+                    :label="position"
+                    :value="position"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="职务2">
-                <el-input v-model="filters.position2" placeholder="请输入职务2" clearable prefix-icon="UserFilled" />
+                <el-select v-model="filters.position2" placeholder="请选择职务2" clearable filterable>
+                  <el-option
+                    v-for="position in distinctPositions2"
+                    :key="position"
+                    :label="position"
+                    :value="position"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="学历">
-                <el-input v-model="filters.education" placeholder="请输入学历" clearable :prefix-icon="Medal" />
+                <el-select v-model="filters.education" placeholder="请选择学历" clearable filterable>
+                  <el-option
+                    v-for="education in distinctEducations"
+                    :key="education"
+                    :label="education"
+                    :value="education"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="政治面貌">
-                <el-select v-model="filters.politicalStatus" placeholder="请选择" clearable>
-                  <el-option label="全部" value="" />
-                  <el-option label="中共党员" value="中共党员" />
-                  <el-option label="预备党员" value="预备党员" />
-                  <el-option label="共青团员" value="共青团员" />
+                <el-select v-model="filters.politicalStatus" placeholder="请选择政治面貌" clearable filterable>
+                  <el-option
+                    v-for="status in distinctPoliticalStatuses"
+                    :key="status"
+                    :label="status"
+                    :value="status"
+                  />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -85,17 +122,38 @@
             </el-col>
             <el-col :span="6">
               <el-form-item label="籍贯">
-                <el-input v-model="filters.nativePlace" placeholder="请输入籍贯" clearable />
+                <el-select v-model="filters.nativePlace" placeholder="请选择籍贯" clearable filterable>
+                  <el-option
+                    v-for="place in distinctNativePlaces"
+                    :key="place"
+                    :label="place"
+                    :value="place"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="民族">
-                <el-input v-model="filters.ethnicity" placeholder="请输入民族" clearable />
+                <el-select v-model="filters.ethnicity" placeholder="请选择民族" clearable filterable>
+                  <el-option
+                    v-for="ethnicity in distinctEthnicities"
+                    :key="ethnicity"
+                    :label="ethnicity"
+                    :value="ethnicity"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item label="专业技术职务">
-                <el-input v-model="filters.technicalPosition" placeholder="请输入专业技术职务" clearable />
+                <el-select v-model="filters.technicalPosition" placeholder="请选择专业技术职务" clearable filterable>
+                  <el-option
+                    v-for="position in distinctTechnicalPositions"
+                    :key="position"
+                    :label="position"
+                    :value="position"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -153,12 +211,26 @@
             </el-col>
             <el-col :span="8">
               <el-form-item label="全日制学历">
-                <el-input v-model="filters.fullTimeEducation" placeholder="请输入全日制学历" clearable />
+                <el-select v-model="filters.fullTimeEducation" placeholder="请选择全日制学历" clearable filterable>
+                  <el-option
+                    v-for="education in distinctFullTimeEducations"
+                    :key="education"
+                    :label="education"
+                    :value="education"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="在职学历">
-                <el-input v-model="filters.partTimeEducation" placeholder="请输入在职学历" clearable />
+                <el-select v-model="filters.partTimeEducation" placeholder="请选择在职学历" clearable filterable>
+                  <el-option
+                    v-for="education in distinctPartTimeEducations"
+                    :key="education"
+                    :label="education"
+                    :value="education"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -442,6 +514,20 @@ const showExportModal = ref(false);
 const exportDefaultFileName = ref("干部信息");
 const exportFilteredData = ref(false); // 标识是否导出筛选后的数据
 const selectedCadres = ref([]); // 用于存储选中的干部
+
+// 存储字段的distinct值
+const distinctDepartments = ref([]); // 部门
+const distinctSections = ref([]); // 科室
+const distinctPositions1 = ref([]); // 职务1
+const distinctPositions2 = ref([]); // 职务2
+const distinctEducations = ref([]); // 学历
+const distinctTechnicalPositions = ref([]); // 专业技术职务
+const distinctNativePlaces = ref([]); // 籍贯
+const distinctEthnicities = ref([]); // 民族
+const distinctBirthPlaces = ref([]); // 出生地
+const distinctFullTimeEducations = ref([]); // 全日制学历
+const distinctPartTimeEducations = ref([]); // 在职学历
+const distinctPoliticalStatuses = ref([]); // 政治面貌
 
 // 学历选项
 const educationOptions = [
@@ -1284,6 +1370,49 @@ async function performExport(exportData) {
   }
 }
 
+// 获取字段的distinct值
+async function loadDistinctFieldValues() {
+  try {
+    // 获取部门的distinct值
+    distinctDepartments.value = await invoke("get_distinct_field_values", { fieldName: "department" });
+    
+    // 获取科室的distinct值
+    distinctSections.value = await invoke("get_distinct_field_values", { fieldName: "section" });
+    
+    // 获取职务1的distinct值
+    distinctPositions1.value = await invoke("get_distinct_field_values", { fieldName: "position1" });
+    
+    // 获取职务2的distinct值
+    distinctPositions2.value = await invoke("get_distinct_field_values", { fieldName: "position2" });
+    
+    // 获取学历的distinct值
+    distinctEducations.value = await invoke("get_distinct_field_values", { fieldName: "education" });
+    
+    // 获取专业技术职务的distinct值
+    distinctTechnicalPositions.value = await invoke("get_distinct_field_values", { fieldName: "technical_position" });
+    
+    // 获取籍贯的distinct值
+    distinctNativePlaces.value = await invoke("get_distinct_field_values", { fieldName: "native_place" });
+    
+    // 获取民族的distinct值
+    distinctEthnicities.value = await invoke("get_distinct_field_values", { fieldName: "ethnicity" });
+    
+    // 获取出生地的distinct值
+    distinctBirthPlaces.value = await invoke("get_distinct_field_values", { fieldName: "birth_place" });
+    
+    // 获取全日制学历的distinct值
+    distinctFullTimeEducations.value = await invoke("get_distinct_field_values", { fieldName: "full_time_education" });
+    
+    // 获取在职学历的distinct值
+    distinctPartTimeEducations.value = await invoke("get_distinct_field_values", { fieldName: "part_time_education" });
+    
+    // 获取政治面貌的distinct值
+    distinctPoliticalStatuses.value = await invoke("get_distinct_field_values", { fieldName: "political_status" });
+  } catch (error) {
+    console.error("获取字段distinct值失败:", error);
+  }
+}
+
 // 获取部门统计信息
 function getDepartmentStats() {
   const stats = {};
@@ -1408,6 +1537,7 @@ function extractIdInfo() {
 // 组件挂载时加载数据
 onMounted(() => {
   loadCadreInfo();
+  loadDistinctFieldValues();
 });
 </script>
 

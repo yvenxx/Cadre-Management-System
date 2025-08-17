@@ -147,6 +147,32 @@ impl Database {
         )
     }
     
+    pub fn get_distinct_field_values(&self, field_name: &str) -> Result<Vec<String>> {
+        // 验证字段名以防止SQL注入
+        let allowed_fields = [
+            "gender", "department", "section", "position1", "position2", "education", 
+            "political_status", "technical_position", "ethnicity", "native_place", "birth_place",
+            "full_time_education", "part_time_education"
+        ];
+        
+        if !allowed_fields.contains(&field_name) {
+            return Err(rusqlite::Error::SqliteFailure(
+                rusqlite::ffi::Error::new(1),
+                Some("Invalid field name".to_string())
+            ));
+        }
+        
+        let query = format!("SELECT DISTINCT {} FROM cadre_info WHERE {} IS NOT NULL AND {} != '' ORDER BY {}", 
+                           field_name, field_name, field_name, field_name);
+        let mut stmt = self.conn.prepare(&query)?;
+        
+        let values: Result<Vec<String>, _> = stmt.query_map([], |row| {
+            row.get(0)
+        })?.collect();
+        
+        values
+    }
+    
     pub fn get_all_cadres(&self) -> Result<Vec<CadreInfo>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, serial_number, name, gender, department, section, position1, position2,
