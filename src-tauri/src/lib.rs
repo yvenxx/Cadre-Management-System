@@ -254,6 +254,31 @@ fn export_cadre_info_to_excel(
     }
 }
 
+#[tauri::command]
+fn get_distinct_field_values(db: State<'_, Mutex<Database>>, field_name: String) -> Result<Vec<String>, String> {
+    println!("开始执行get_distinct_field_values命令，字段名: {}", field_name);
+    
+    match db.lock() {
+        Ok(db_guard) => {
+            println!("获取数据库锁成功");
+            match db_guard.get_distinct_field_values(&field_name) {
+                Ok(values) => {
+                    println!("获取字段{}的distinct值成功，共{}个值", field_name, values.len());
+                    Ok(values)
+                },
+                Err(e) => {
+                    eprintln!("获取字段{}的distinct值失败: {}", field_name, e);
+                    Err(format!("获取字段{}的distinct值失败: {}", field_name, e))
+                }
+            }
+        },
+        Err(e) => {
+            eprintln!("获取数据库锁失败: {}", e);
+            Err(format!("获取数据库锁失败: {}", e))
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("初始化Tauri应用");
@@ -283,7 +308,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             get_cadre_info_by_id,
             update_cadre_info,
             delete_cadre_info,
-            export_cadre_info_to_excel
+            export_cadre_info_to_excel,
+            get_distinct_field_values
         ])
         .run(tauri::generate_context!())
         .map_err(|e| {

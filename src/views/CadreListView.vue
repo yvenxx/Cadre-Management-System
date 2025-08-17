@@ -1413,15 +1413,249 @@ async function loadDistinctFieldValues() {
   }
 }
 
-// 获取部门统计信息
+// 获取部门统计信息（人数和百分比）
 function getDepartmentStats() {
   const stats = {};
-  cadreList.value.forEach(cadre => {
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
     if (cadre.department) {
       stats[cadre.department] = (stats[cadre.department] || 0) + 1;
     }
   });
-  return stats;
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [department, count] of Object.entries(stats)) {
+    result[department] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取性别统计信息（人数和百分比）
+function getGenderStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.gender) {
+      stats[cadre.gender] = (stats[cadre.gender] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [gender, count] of Object.entries(stats)) {
+    result[gender] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取年龄分布统计信息（人数和百分比）
+function getAgeDistribution() {
+  const stats = {
+    "30岁以下": 0,
+    "30-40岁": 0,
+    "40-50岁": 0,
+    "50-60岁": 0,
+    "60岁以上": 0
+  };
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.age !== null && cadre.age !== undefined) {
+      const age = parseInt(cadre.age);
+      if (age < 30) {
+        stats["30岁以下"]++;
+      } else if (age < 40) {
+        stats["30-40岁"]++;
+      } else if (age < 50) {
+        stats["40-50岁"]++;
+      } else if (age < 60) {
+        stats["50-60岁"]++;
+      } else {
+        stats["60岁以上"]++;
+      }
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [range, count] of Object.entries(stats)) {
+    result[range] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取司龄分布统计信息（人数和百分比）
+function getCompanyTenureDistribution() {
+  const stats = {
+    "5年以下": 0,
+    "5-10年": 0,
+    "10-20年": 0,
+    "20-30年": 0,
+    "30年以上": 0
+  };
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.company_tenure !== null && cadre.company_tenure !== undefined) {
+      const tenure = parseFloat(cadre.company_tenure);
+      if (tenure < 5) {
+        stats["5年以下"]++;
+      } else if (tenure < 10) {
+        stats["5-10年"]++;
+      } else if (tenure < 20) {
+        stats["10-20年"]++;
+      } else if (tenure < 30) {
+        stats["20-30年"]++;
+      } else {
+        stats["30年以上"]++;
+      }
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [range, count] of Object.entries(stats)) {
+    result[range] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取职务分布统计信息（人数和百分比）
+function getPositionStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    // 统计职务1和职务2
+    if (cadre.position1) {
+      stats[cadre.position1] = (stats[cadre.position1] || 0) + 1;
+    }
+    if (cadre.position2) {
+      stats[cadre.position2] = (stats[cadre.position2] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [position, count] of Object.entries(stats)) {
+    result[position] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取最高学历分布统计信息（人数和百分比）
+function getEducationStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.education) {
+      stats[cadre.education] = (stats[cadre.education] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [education, count] of Object.entries(stats)) {
+    result[education] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取政治面貌分布统计信息（人数和百分比）
+function getPoliticalStatusStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.political_status) {
+      stats[cadre.political_status] = (stats[cadre.political_status] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [status, count] of Object.entries(stats)) {
+    result[status] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取全日制学历分布统计信息（人数和百分比）
+function getFullTimeEducationStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.full_time_education) {
+      stats[cadre.full_time_education] = (stats[cadre.full_time_education] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [education, count] of Object.entries(stats)) {
+    result[education] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
+}
+
+// 获取在职学历分布统计信息（人数和百分比）
+function getPartTimeEducationStats() {
+  const stats = {};
+  const total = filteredCadreList.value.length;
+  
+  filteredCadreList.value.forEach(cadre => {
+    if (cadre.part_time_education) {
+      stats[cadre.part_time_education] = (stats[cadre.part_time_education] || 0) + 1;
+    }
+  });
+  
+  // 添加百分比信息
+  const result = {};
+  for (const [education, count] of Object.entries(stats)) {
+    result[education] = {
+      count: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
+    };
+  }
+  
+  return result;
 }
 
 // 计算司龄
@@ -1610,5 +1844,107 @@ onMounted(() => {
   background-color: #337ecc;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 导出按钮容器样式 */
+.export-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.export-buttons-info {
+  flex: 1;
+}
+
+.export-count-info {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.export-buttons-group {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.filter-actions .el-button {
+  margin: 0 10px;
+}
+
+.age-range-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.age-range-separator {
+  color: #999;
+}
+
+.field-selection {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+/* 表格相关样式 */
+.el-table .el-table__row.hover-row {
+  background-color: #f5f7fa;
+}
+
+.el-table .el-table__row.current-row {
+  background-color: #ecf5ff;
+}
+
+/* 筛选面板样式 */
+.filter-content {
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.filter-content .el-form-item {
+  margin-bottom: 18px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .export-buttons-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .export-count-info {
+    text-align: center;
+  }
+  
+  .export-buttons-group {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
