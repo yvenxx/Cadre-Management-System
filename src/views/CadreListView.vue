@@ -380,6 +380,8 @@
           <el-button type="primary" @click="openAddModal" :icon="Plus">新增</el-button>
           <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0">导出选中</el-button>
           <el-button type="warning" @click="exportAllCadres" :icon="Download">导出全部</el-button>
+          <el-button type="info" @click="downloadImportTemplate" :icon="Download">下载模板</el-button>
+          <el-button type="info" @click="openImportDialog" :icon="Upload">导入数据</el-button>
         </div>
       </div>
 
@@ -474,6 +476,36 @@
       :default-file-name="exportDefaultFileName"
       @export="performExport"
     />
+    
+    <!-- 导入数据弹窗 -->
+    <el-dialog
+      v-model="showImportModal"
+      title="导入干部信息"
+      width="500px"
+      @close="handleImportClose"
+    >
+      <el-form label-position="top">
+        <el-alert
+          title="请选择要导入的Excel文件"
+          type="info"
+          description="支持.xlsx和.xls格式的Excel文件"
+          show-icon
+        />
+      </el-form>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleImportClose">取消</el-button>
+          <el-button 
+            type="primary" 
+            @click="performImport" 
+            :loading="importLoading"
+          >
+            {{ importLoading ? '导入中...' : '选择文件并导入' }}
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -511,9 +543,13 @@ function formatDate(date) {
 
 const showModal = ref(false);
 const showExportModal = ref(false);
+const showImportModal = ref(false); // 导入弹窗显示状态
 const exportDefaultFileName = ref("干部信息");
 const exportFilteredData = ref(false); // 标识是否导出筛选后的数据
 const selectedCadres = ref([]); // 用于存储选中的干部
+
+// 导入相关变量
+const importLoading = ref(false);
 
 // 存储字段的distinct值
 const distinctDepartments = ref([]); // 部门
@@ -1243,6 +1279,94 @@ function closeExportModal() {
   showExportModal.value = false;
 }
 
+// 下载导入模板
+async function downloadImportTemplate() {
+  try {
+    console.log("开始下载导入模板");
+    
+    // 弹出文件保存对话框，让用户选择保存位置
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    const filePath = await save({
+      filters: [{
+        name: 'Excel Files',
+        extensions: ['xlsx']
+      }],
+      defaultPath: "干部信息导入模板.xlsx"
+    });
+    
+    // 如果用户取消了保存对话框，则不执行下载
+    if (!filePath) {
+      console.log("用户取消了保存操作");
+      return;
+    }
+    
+    // 调用后端直接保存模板到指定路径
+    await invoke("save_import_template", { filePath });
+    
+    console.log("导入模板保存完成，路径:", filePath);
+    alert("导入模板已保存到: " + filePath);
+  } catch (error) {
+    console.error("下载导入模板失败:", error);
+    alert("下载导入模板失败: " + error);
+  }
+}
+
+// 打开导入对话框
+function openImportDialog() {
+  showImportModal.value = true;
+}
+
+// 执行导入操作
+async function performImport() {
+  importLoading.value = true;
+  
+  try {
+    // 使用Tauri的文件选择对话框
+    const { open } = await import('@tauri-apps/plugin-dialog');
+    const selected = await open({
+      multiple: false,
+      filters: [{
+        name: 'Excel Files',
+        extensions: ['xlsx', 'xls']
+      }]
+    });
+    
+    if (!selected) {
+      alert("未选择文件");
+      importLoading.value = false;
+      return;
+    }
+    
+    console.log("开始导入文件:", selected);
+    
+    // 调用后端导入功能
+    const result = await invoke("import_cadre_info_from_excel", { 
+      filePath: selected
+    });
+    
+    alert(result);
+    
+    // 关闭导入对话框
+    handleImportClose();
+    
+    // 重新加载数据
+    loadCadreInfo();
+  } catch (error) {
+    console.error("导入失败:", error);
+    alert("导入失败: " + error);
+  } finally {
+    importLoading.value = false;
+  }
+}
+
+// 处理导入对话框关闭
+function handleImportClose() {
+  showImportModal.value = false;
+  
+  // 重置导入状态
+  importLoading.value = false;
+}
+
 // 切换筛选面板显示状态
 function toggleFilterPanel() {
   showFilterPanel.value = !showFilterPanel.value;
@@ -1876,6 +2000,23 @@ onMounted(() => {
 .export-buttons-group {
   display: flex;
   gap: 10px;
+}
+
+.file-info {
+  background: #f5f7fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+}
+
+.file-info p {
+  margin: 5px 0;
+  color: #606266;
+}
+
+.dialog-footer {
+  text-align: right;
+  margin-top: 20px;
 }
 
 .filter-actions {
