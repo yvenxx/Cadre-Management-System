@@ -553,11 +553,14 @@ async function handleSubmit() {
       } else if (cadreToSave[field]) {
         // 如果是字符串，直接使用formatDate函数处理
         cadreToSave[field] = formatDate(cadreToSave[field]);
+      } else {
+        // 如果是空值，保持为null或空字符串
+        cadreToSave[field] = null;
       }
     });
     
     // 确保数字字段被正确处理
-    if (cadreToSave.probation_period !== null && cadreToSave.probation_period !== undefined) {
+    if (cadreToSave.probation_period !== null && cadreToSave.probation_period !== undefined && cadreToSave.probation_period !== "") {
       cadreToSave.probation_period = cadreToSave.probation_period.toString();
     } else {
       cadreToSave.probation_period = null;

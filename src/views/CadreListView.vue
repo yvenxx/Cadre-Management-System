@@ -399,6 +399,7 @@
       v-model="showExportModal"
       :selected-cadres="selectedCadres"
       :export-fields="exportFields"
+      :default-file-name="exportDefaultFileName"
       @export="performExport"
     />
   </div>
@@ -413,25 +414,31 @@ import ExportConfig from '../components/ExportConfig.vue';
 
 // 日期格式化辅助函数
 function formatDate(date) {
-  if (!date) return "";
-  
-  // 如果是字符串，尝试转换为日期对象
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  // 检查是否是有效日期
-  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+  try {
+    if (!date) return "";
+    
+    // 如果是字符串，尝试转换为日期对象
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // 检查是否是有效日期
+    if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+      return "";
+    }
+    
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error("日期格式化错误:", error, "输入值:", date);
     return "";
   }
-  
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;
 }
 
 const showModal = ref(false);
 const showExportModal = ref(false);
+const exportDefaultFileName = ref("干部信息");
 const selectedCadres = ref([]); // 用于存储选中的干部
 
 // 学历选项
@@ -574,7 +581,7 @@ const currentCadre = ref({
   work_tenure: null,
   current_level_date: "",
   position_entry_date: "",
-  probation_period: "",
+  probation_period: null,
   probation_end_reminder: "",
   id_number: "",
   birth_date: "",
@@ -703,7 +710,14 @@ const filteredCadreList = computed(() => {
     
     // 入司日期范围筛选
     if (filterDateRanges.value.companyEntryDate && filterDateRanges.value.companyEntryDate.length === 2) {
+      if (!cadre.company_entry_date) {
+        return false;
+      }
       const entryDate = new Date(cadre.company_entry_date);
+      // 检查日期是否有效
+      if (isNaN(entryDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.companyEntryDate.map(date => new Date(date));
       
       if (entryDate < startDate) {
@@ -748,7 +762,14 @@ const filteredCadreList = computed(() => {
     
     // 出生日期范围筛选
     if (filterDateRanges.value.birthDate && filterDateRanges.value.birthDate.length === 2) {
+      if (!cadre.birth_date) {
+        return false;
+      }
       const birthDate = new Date(cadre.birth_date);
+      // 检查日期是否有效
+      if (isNaN(birthDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.birthDate.map(date => new Date(date));
       
       if (birthDate < startDate) {
@@ -762,7 +783,14 @@ const filteredCadreList = computed(() => {
     
     // 参加工作时间范围筛选
     if (filterDateRanges.value.workStart && filterDateRanges.value.workStart.length === 2) {
+      if (!cadre.work_start_date) {
+        return false;
+      }
       const workDate = new Date(cadre.work_start_date);
+      // 检查日期是否有效
+      if (isNaN(workDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.workStart.map(date => new Date(date));
       
       if (workDate < startDate) {
@@ -776,7 +804,14 @@ const filteredCadreList = computed(() => {
     
     // 任现职级时间范围筛选
     if (filterDateRanges.value.currentLevel && filterDateRanges.value.currentLevel.length === 2) {
+      if (!cadre.current_level_date) {
+        return false;
+      }
       const currentDate = new Date(cadre.current_level_date);
+      // 检查日期是否有效
+      if (isNaN(currentDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.currentLevel.map(date => new Date(date));
       
       if (currentDate < startDate) {
@@ -790,7 +825,14 @@ const filteredCadreList = computed(() => {
     
     // 任职时间范围筛选
     if (filterDateRanges.value.positionEntry && filterDateRanges.value.positionEntry.length === 2) {
+      if (!cadre.position_entry_date) {
+        return false;
+      }
       const positionDate = new Date(cadre.position_entry_date);
+      // 检查日期是否有效
+      if (isNaN(positionDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.positionEntry.map(date => new Date(date));
       
       if (positionDate < startDate) {
@@ -804,7 +846,14 @@ const filteredCadreList = computed(() => {
     
     // 入党时间范围筛选
     if (filterDateRanges.value.partyEntry && filterDateRanges.value.partyEntry.length === 2) {
+      if (!cadre.party_entry_date) {
+        return false;
+      }
       const partyDate = new Date(cadre.party_entry_date);
+      // 检查日期是否有效
+      if (isNaN(partyDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.partyEntry.map(date => new Date(date));
       
       if (partyDate < startDate) {
@@ -818,7 +867,14 @@ const filteredCadreList = computed(() => {
     
     // 试用期满到期提醒范围筛选
     if (filterDateRanges.value.probationEndReminder && filterDateRanges.value.probationEndReminder.length === 2) {
+      if (!cadre.probation_end_reminder) {
+        return false;
+      }
       const reminderDate = new Date(cadre.probation_end_reminder);
+      // 检查日期是否有效
+      if (isNaN(reminderDate.getTime())) {
+        return false;
+      }
       const [startDate, endDate] = filterDateRanges.value.probationEndReminder.map(date => new Date(date));
       
       if (reminderDate < startDate) {
@@ -858,9 +914,18 @@ const filteredCadreList = computed(() => {
 // 加载所有干部信息
 async function loadCadreInfo() {
   try {
-    cadreList.value = await invoke("get_all_cadre_info");
+    const data = await invoke("get_all_cadre_info");
+    // 添加数据验证
+    if (Array.isArray(data)) {
+      cadreList.value = data;
+    } else {
+      console.error("获取的数据格式不正确:", data);
+      cadreList.value = [];
+    }
   } catch (error) {
     console.error("加载干部信息失败:", error);
+    // 确保即使出错也不会导致界面崩溃
+    cadreList.value = [];
   }
 }
 
@@ -878,11 +943,14 @@ async function saveCadreInfo(cadreData) {
     loadCadreInfo();
   } catch (error) {
     console.error("保存干部信息失败:", error);
-    if (error.name === 'ValidationError') {
-      console.error("表单验证失败:", error);
-    } else {
-      console.error("保存干部信息失败:", error);
+    // 使用更友好的错误提示
+    let errorMessage = "保存干部信息失败";
+    if (error && typeof error === 'string') {
+      errorMessage += ": " + error;
+    } else if (error && error.message) {
+      errorMessage += ": " + error.message;
     }
+    alert(errorMessage);
   }
 }
 
@@ -1014,6 +1082,14 @@ async function deleteCadre(id) {
       loadCadreInfo();
     } catch (error) {
       console.error("删除干部信息失败:", error);
+      // 使用更友好的错误提示
+      let errorMessage = "删除干部信息失败";
+      if (error && typeof error === 'string') {
+        errorMessage += ": " + error;
+      } else if (error && error.message) {
+        errorMessage += ": " + error.message;
+      }
+      alert(errorMessage);
     }
   }
 }
@@ -1135,8 +1211,9 @@ async function exportSelectedCadres() {
   }
   
   try {
-    // 打开导出配置弹窗，设置默认文件名为"选中干部信息"
-    exportConfig.value.fileName = "选中干部信息";
+    // 设置默认文件名
+    exportDefaultFileName.value = "选中干部信息";
+    // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
     console.error("导出选中干部信息失败:", error);
@@ -1147,8 +1224,9 @@ async function exportSelectedCadres() {
 // 导出全部干部信息
 async function exportAllCadres() {
   try {
-    // 打开导出配置弹窗，设置默认文件名为"全部干部信息"
-    exportConfig.value.fileName = "全部干部信息";
+    // 设置默认文件名
+    exportDefaultFileName.value = "全部干部信息";
+    // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
     console.error("导出全部干部信息失败:", error);

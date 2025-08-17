@@ -63,6 +63,10 @@ const props = defineProps({
   exportFields: {
     type: Array,
     required: true
+  },
+  defaultFileName: {
+    type: String,
+    default: "干部信息"
   }
 });
 
@@ -81,7 +85,7 @@ const visible = computed({
 
 // 导出配置
 const config = ref({
-  fileName: "干部信息",
+  fileName: props.defaultFileName,
   selectedFields: [], // 选中的字段
   selectAllFields: false
 });

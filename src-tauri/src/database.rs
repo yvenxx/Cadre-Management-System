@@ -48,8 +48,18 @@ impl Database {
     pub fn new() -> Result<Self> {
         // Create the database directory if it doesn't exist
         let db_dir = "data";
-        if !fs::metadata(db_dir).is_ok() {
-            fs::create_dir(db_dir).expect("Failed to create data directory");
+        if let Err(e) = fs::metadata(db_dir) {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                fs::create_dir(db_dir).map_err(|e| rusqlite::Error::SqliteFailure(
+                    rusqlite::ffi::Error::new(1), 
+                    Some(format!("Failed to create data directory: {}", e))
+                ))?;
+            } else {
+                return Err(rusqlite::Error::SqliteFailure(
+                    rusqlite::ffi::Error::new(1), 
+                    Some(format!("Failed to check data directory: {}", e))
+                ));
+            }
         }
         
         let conn = Connection::open("data/cadre.db")?;
