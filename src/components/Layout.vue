@@ -25,6 +25,9 @@
         <CadreListView v-if="activeMenu === 'cadre-list'" />
         <StatisticsView v-else-if="activeMenu === 'statistics'" />
       </el-main>
+      <el-footer class="app-footer-container">
+        <Footer />
+      </el-footer>
     </el-container>
   </el-container>
 </template>
@@ -81,7 +84,15 @@ const handleMenuSelect = (index) => {
 .main-content {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   padding: 25px;
-  height: calc(100vh - 50px);
+  height: calc(100vh - 100px);
   overflow-y: auto;
+}
+
+.app-footer-container {
+  background-color: #ffffff;
+  padding: 10px 0;
+  text-align: center;
+  height: 50px;
+  border-top: 1px solid #e9ecef;
 }
 </style>

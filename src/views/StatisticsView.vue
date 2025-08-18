@@ -215,9 +215,6 @@
           </el-card>
         </el-col>
       </el-row>
-      
-      <!-- 页脚 -->
-      <Footer />
     </el-card>
   </div>
 </template>
@@ -225,14 +222,12 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-import Footer from '../components/Footer.vue';
 
 // 活动标签页
 const activeTab = ref("gender");
 
 // 干部数据
 const cadreList = ref([]);
-
 // 加载所有干部信息
 async function loadCadreInfo() {
   try {
@@ -469,6 +464,7 @@ onMounted(() => {
 <style scoped>
 .statistics-view {
   height: 100%;
+  overflow: visible;
 }
 
 .content-section {
@@ -476,9 +472,7 @@ onMounted(() => {
   border-radius: 16px;
   box-shadow: var(--card-shadow);
   position: relative;
-  overflow: auto;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  max-height: calc(100vh - 50px);
 }
 
 .content-section::before {

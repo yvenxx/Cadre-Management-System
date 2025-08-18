@@ -461,9 +461,6 @@
       </el-table>
     </el-card>
     
-    <!-- 页脚 -->
-    <Footer />
-    
     <!-- 新增/编辑弹窗 -->
     <CadreForm 
       v-model="showModal"
@@ -520,7 +517,6 @@ import { ElMessageBox } from 'element-plus';
 import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
-import Footer from '../components/Footer.vue';
 
 // 日期格式化辅助函数
 function formatDate(date) {
@@ -2076,6 +2072,45 @@ onMounted(() => {
 
 .el-table .el-table__row.current-row {
   background-color: #ecf5ff;
+}
+
+/* 自定义滚动条样式，使其更显眼和易于操作 */
+.el-table__body-wrapper::-webkit-scrollbar,
+.el-table__header-wrapper::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.el-table__body-wrapper::-webkit-scrollbar-track,
+.el-table__header-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.el-table__body-wrapper::-webkit-scrollbar-thumb,
+.el-table__header-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 6px;
+  border: 2px solid #f1f1f1;
+}
+
+.el-table__body-wrapper::-webkit-scrollbar-thumb:hover,
+.el-table__header-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.el-table__body-wrapper::-webkit-scrollbar-corner,
+.el-table__header-wrapper::-webkit-scrollbar-corner {
+  background: #f1f1f1;
+}
+
+/* 表格容器样式，确保滚动条可见 */
+.el-table {
+  overflow-x: auto;
+}
+
+.el-table__body-wrapper {
+  overflow-x: auto;
 }
 
 /* 筛选面板样式 */

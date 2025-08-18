@@ -465,23 +465,50 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         }
     };
     
-    // 解析各字段
+    // 解析各字段 (按照新的列顺序)
     let name = get_cell_value(0); // 姓名
     if name.trim().is_empty() {
         return Err(format!("第{}行姓名不能为空", row_index));
     }
     
-    // 对日期字段应用标准化函数
-    let company_entry_date = normalize_date_format(&get_cell_value(6)); // 入司日期
-    let current_level_date = normalize_date_format(&get_cell_value(7)); // 任现职级时间
-    let position_entry_date = normalize_date_format(&get_cell_value(8)); // 任职时间
-    let probation_end_reminder = normalize_date_format(&get_cell_value(10)); // 试用期满到期提醒
-    let party_entry_date = normalize_date_format(&get_cell_value(19)); // 入党时间
-    let birth_date = normalize_date_format(&get_cell_value(21)); // 出生日期
-    let work_start_date = normalize_date_format(&get_cell_value(27)); // 参加工作时间
-    
-    // 获取身份证号
+    let gender = get_cell_value(1); // 性别
+    let department = get_cell_value(2); // 部门
+    let section = get_cell_value(3); // 科室
+    let position1 = get_cell_value(4); // 职务1
+    let position2 = get_cell_value(5); // 职务2
+    let company_entry_date_raw = get_cell_value(6); // 入司日期
+    let current_level_date_raw = get_cell_value(7); // 任现职级时间
+    let position_entry_date_raw = get_cell_value(8); // 任职时间
+    let probation_period = get_cell_value(9); // 试用期(年)
+    let probation_end_reminder_raw = get_cell_value(10); // 试用期满到期提醒
     let id_number = get_cell_value(11); // 身份证号
+    let birth_date_raw = get_cell_value(12); // 出生日期
+    let age_raw = get_cell_value(13); // 年龄
+    let native_place = get_cell_value(14); // 籍贯
+    let birth_place = get_cell_value(15); // 出生地
+    let ethnicity = get_cell_value(16); // 民族
+    let company_tenure_raw = get_cell_value(17); // 司龄(年)
+    let work_start_date_raw = get_cell_value(18); // 参加工作时间
+    let work_tenure_raw = get_cell_value(19); // 工龄(年)
+    let technical_position = get_cell_value(20); // 专业技术职务
+    let education = get_cell_value(21); // 最高学历
+    let full_time_education = get_cell_value(22); // 全日制学历
+    let full_time_school_major = get_cell_value(23); // 全日制毕业院校系及专业
+    let part_time_education = get_cell_value(24); // 在职学历
+    let part_time_school_phone = get_cell_value(25); // 在职毕业院校系及专业
+    let political_status = get_cell_value(26); // 政治面貌
+    let party_entry_date_raw = get_cell_value(27); // 入党时间
+    let phone = get_cell_value(28); // 联系电话
+    let remarks = get_cell_value(29); // 备注
+    
+    // 对日期字段应用标准化函数
+    let company_entry_date = normalize_date_format(&company_entry_date_raw); // 入司日期
+    let current_level_date = normalize_date_format(&current_level_date_raw); // 任现职级时间
+    let position_entry_date = normalize_date_format(&position_entry_date_raw); // 任职时间
+    let probation_end_reminder = normalize_date_format(&probation_end_reminder_raw); // 试用期满到期提醒
+    let party_entry_date = normalize_date_format(&party_entry_date_raw); // 入党时间
+    let birth_date = normalize_date_format(&birth_date_raw); // 出生日期
+    let work_start_date = normalize_date_format(&work_start_date_raw); // 参加工作时间
     
     // 自动计算字段
     // 1. 根据身份证号计算出生日期和年龄
@@ -536,10 +563,9 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
     
     // 4. 根据任职时间和试用期计算试用期满到期提醒
     let calculated_probation_end_reminder = {
-        let probation_period_str = get_cell_value(9); // 试用期(年)
-        if !position_entry_date.is_empty() && !probation_period_str.is_empty() {
+        if !position_entry_date.is_empty() && !probation_period.is_empty() {
             if let Ok(position_date) = NaiveDate::parse_from_str(&position_entry_date, "%Y-%m-%d") {
-                if let Ok(probation_years) = probation_period_str.parse::<f32>() {
+                if let Ok(probation_years) = probation_period.parse::<f32>() {
                     // 计算试用期结束日期
                     let end_date = position_date + Duration::days((probation_years * 365.0) as i64);
                     Some(end_date.format("%Y-%m-%d").to_string())
@@ -558,30 +584,30 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         id: None,
         serial_number: None, // 序号字段已移除
         name: name,
-        gender: Some(get_cell_value(1)), // 性别
-        department: Some(get_cell_value(2)), // 部门
-        section: Some(get_cell_value(3)), // 科室
-        position1: Some(get_cell_value(4)), // 职务1
-        position2: Some(get_cell_value(5)), // 职务2
+        gender: Some(gender), // 性别
+        department: Some(department), // 部门
+        section: Some(section), // 科室
+        position1: Some(position1), // 职务1
+        position2: Some(position2), // 职务2
         company_entry_date: Some(company_entry_date), // 入司日期 (已标准化)
         current_level_date: Some(current_level_date), // 任现职级时间 (已标准化)
         position_entry_date: Some(position_entry_date), // 任职时间 (已标准化)
-        probation_period: Some(get_cell_value(9)), // 试用期(年)
+        probation_period: Some(probation_period), // 试用期(年)
         probation_end_reminder: if let Some(date) = &calculated_probation_end_reminder {
             Some(date.clone())
         } else {
             Some(probation_end_reminder) // 如果没有计算出结果，则使用模板中的值
         }, // 试用期满到期提醒 (已标准化)
         id_number: Some(id_number), // 身份证号
-        technical_position: Some(get_cell_value(12)), // 专业技术职务
-        education: Some(get_cell_value(13)), // 最高学历
-        full_time_education: Some(get_cell_value(14)), // 全日制学历
-        full_time_school_major: Some(get_cell_value(15)), // 全日制毕业院校系及专业
-        part_time_education: Some(get_cell_value(16)), // 在职学历
-        part_time_school_phone: Some(get_cell_value(17)), // 在职毕业院校系及专业
-        political_status: Some(get_cell_value(18)), // 政治面貌
+        technical_position: Some(technical_position), // 专业技术职务
+        education: Some(education), // 最高学历
+        full_time_education: Some(full_time_education), // 全日制学历
+        full_time_school_major: Some(full_time_school_major), // 全日制毕业院校系及专业
+        part_time_education: Some(part_time_education), // 在职学历
+        part_time_school_phone: Some(part_time_school_phone), // 在职毕业院校系及专业
+        political_status: Some(political_status), // 政治面貌
         party_entry_date: Some(party_entry_date), // 入党时间 (已标准化)
-        phone: Some(get_cell_value(20)), // 联系电话
+        phone: Some(phone), // 联系电话
         birth_date: if let Some(date) = &calculated_birth_date {
             Some(date.clone())
         } else {
@@ -590,22 +616,20 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         age: if let Some(age) = calculated_age {
             Some(age)
         } else {
-            let age_str = get_cell_value(22); // 年龄
-            if !age_str.is_empty() {
-                age_str.parse::<i32>().ok()
+            if !age_raw.is_empty() {
+                age_raw.parse::<i32>().ok()
             } else {
                 None
             }
         }, // 年龄
-        native_place: Some(get_cell_value(23)), // 籍贯
-        birth_place: Some(get_cell_value(24)), // 出生地
-        ethnicity: Some(get_cell_value(25)), // 民族
+        native_place: Some(native_place), // 籍贯
+        birth_place: Some(birth_place), // 出生地
+        ethnicity: Some(ethnicity), // 民族
         company_tenure: if let Some(tenure) = calculated_company_tenure {
             Some(tenure)
         } else {
-            let tenure_str = get_cell_value(26); // 司龄(年)
-            if !tenure_str.is_empty() {
-                tenure_str.parse::<f32>().ok()
+            if !company_tenure_raw.is_empty() {
+                company_tenure_raw.parse::<f32>().ok()
             } else {
                 None
             }
@@ -614,14 +638,13 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         work_tenure: if let Some(tenure) = calculated_work_tenure {
             Some(tenure)
         } else {
-            let tenure_str = get_cell_value(28); // 工龄(年)
-            if !tenure_str.is_empty() {
-                tenure_str.parse::<f32>().ok()
+            if !work_tenure_raw.is_empty() {
+                work_tenure_raw.parse::<f32>().ok()
             } else {
                 None
             }
         }, // 工龄(年)
-        remarks: Some(get_cell_value(29)), // 备注
+        remarks: Some(remarks), // 备注
         major: None, // 专业字段（未在Excel中使用）
         contact_date: None, // 联系日期字段（未在Excel中使用）
         special_date: None, // 特殊日期字段（未在Excel中使用）
@@ -647,36 +670,40 @@ fn generate_import_template() -> Result<Vec<u8>, String> {
     workbook.write_sheet(&mut sheet, |sheet_writer| {
         use simple_excel_writer::*;
         
-        // 写入表头
+        // 写入表头 (按照新的列顺序)
         sheet_writer.append_row(row!["姓名", "性别", "部门", "科室", "职务1", "职务2", 
                       "入司日期", "任现职级时间", "任职时间", "试用期(年)", "试用期满到期提醒",
-                      "身份证号", "专业技术职务", "最高学历", "全日制学历", "全日制毕业院校系及专业",
-                      "在职学历", "在职毕业院校系及专业", "政治面貌", "入党时间", "联系电话",
-                      "出生日期", "年龄", "籍贯", "出生地", "民族", "司龄(年)", "参加工作时间", "工龄(年)", "备注"])?;
+                      "身份证号", "出生日期", "年龄", "籍贯", "出生地", "民族", "司龄(年)", 
+                      "参加工作时间", "工龄(年)", "专业技术职务", "最高学历", "全日制学历", 
+                      "全日制毕业院校系及专业", "在职学历", "在职毕业院校系及专业", 
+                      "政治面貌", "入党时间", "联系电话", "备注"])?;
         
         // 写入数据规范说明行
         sheet_writer.append_row(row!["", "男/女", "部门名称", "科室名称", "职务名称", "职务名称",
                       "YYYY-MM-DD", "YYYY-MM-DD", "YYYY-MM-DD", "数字", "YYYY-MM-DD",
-                      "18位身份证号", "职务名称", "学历名称", "学历名称", "学校专业",
-                      "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", "手机号码",
-                      "YYYY-MM-DD", "数字", "地区", "地区", "民族名称", "数字", "YYYY-MM-DD", "数字", "备注信息"])?;
+                      "18位身份证号", "YYYY-MM-DD", "数字", "地区", "地区", "民族名称", 
+                      "数字", "YYYY-MM-DD", "数字", "职务名称", "学历名称", "学历名称", 
+                      "学校专业", "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", 
+                      "手机号码", "备注信息"])?;
         
         // 写入示例行
         sheet_writer.append_row(row!["张三", "男", "人力资源部", "招聘科", "部长", "副主任",
                       "2020-01-15", "2021-03-20", "2020-01-15", "1", "2021-01-15",
-                      "110101199001011234", "高级工程师", "硕士研究生", "硕士研究生", "清华大学计算机系",
-                      "硕士研究生", "清华大学计算机系", "中共党员", "2015-06-15", "13800138000",
-                      "1990-01-01", "34", "北京", "北京", "汉族", "4.5", "2010-07-01", "13.5", "优秀员工"])?;
+                      "110101199001011234", "1990-01-01", "34", "北京", "北京", "汉族", "4.5", 
+                      "2010-07-01", "13.5", "高级工程师", "硕士研究生", "硕士研究生", 
+                      "清华大学计算机系", "硕士研究生", "清华大学计算机系", "中共党员", 
+                      "2015-06-15", "13800138000", "优秀员工"])?;
         
         // 写入政治面貌选项说明
         sheet_writer.append_row(row!["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                      "", "", "可选值: 中共党员/预备党员/共青团员/民革党员/民盟盟员/民建会员/民进会员/农工党党员/致公党党员/九三学社社员/台盟盟员/无党派人士/群众", "", "", "", "", "", "", "", "", ""])?;
+                      "", "", "", "", "", "", "", "", "", 
+                      "可选值: 中共党员/预备党员/共青团员/民革党员/民盟盟员/民建会员/民进会员/农工党党员/致公党党员/九三学社社员/台盟盟员/无党派人士/群众", "", "", ""])?;
         
         // 写入学历选项说明
-        sheet_writer.append_row(row!["", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                      "可选值: 博士研究生/硕士研究生/大学/大专/高中/中专/初中/职高", 
+        sheet_writer.append_row(row!["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+                      "", "", "可选值: 博士研究生/硕士研究生/大学/大专/高中/中专/初中/职高", 
                       "可选值: 博士研究生/硕士研究生/大学/大专/高中/中专/初中/职高", "", 
-                      "可选值: 博士研究生/硕士研究生/大学/大专/高中/中专/初中/职高", "", "", "", "", "", "", "", "", ""])?;
+                      "可选值: 博士研究生/硕士研究生/大学/大专/高中/中专/初中/职高", "", "", ""])?;
         
         Ok(())
     }).map_err(|e| format!("生成Excel模板失败: {}", e))?;
