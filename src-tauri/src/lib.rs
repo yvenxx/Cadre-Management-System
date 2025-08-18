@@ -7,7 +7,7 @@ use tauri::State;
 use std::sync::Mutex;
 use calamine::{open_workbook_auto, Reader, Sheets, Data, ExcelDateTime};
 // 导入处理chrono日期所需的类型
-use chrono::{NaiveDate, Duration};
+use chrono::{NaiveDate, Duration, Local};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -480,6 +480,80 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
     let birth_date = normalize_date_format(&get_cell_value(21)); // 出生日期
     let work_start_date = normalize_date_format(&get_cell_value(27)); // 参加工作时间
     
+    // 获取身份证号
+    let id_number = get_cell_value(11); // 身份证号
+    
+    // 自动计算字段
+    // 1. 根据身份证号计算出生日期和年龄
+    let (calculated_birth_date, calculated_age) = if !id_number.is_empty() && id_number.len() == 18 {
+        // 提取出生日期 (第7-14位)
+        let birth_year = &id_number[6..10];
+        let birth_month = &id_number[10..12];
+        let birth_day = &id_number[12..14];
+        
+        // 创建日期字符串
+        let birth_date_str = format!("{}-{}-{}", birth_year, birth_month, birth_day);
+        
+        // 计算年龄
+        if let Ok(birth_date) = NaiveDate::parse_from_str(&birth_date_str, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let age = (today - birth_date).num_days() / 365;
+            (Some(birth_date_str), Some(age as i32))
+        } else {
+            (Some(birth_date_str), None)
+        }
+    } else {
+        (None, None)
+    };
+    
+    // 2. 根据入司日期计算司龄
+    let calculated_company_tenure = if !company_entry_date.is_empty() {
+        if let Ok(entry_date) = NaiveDate::parse_from_str(&company_entry_date, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let diff_days = (today - entry_date).num_days();
+            let tenure = diff_days as f32 / 365.0;
+            Some(tenure)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    // 3. 根据参加工作时间计算工龄
+    let calculated_work_tenure = if !work_start_date.is_empty() {
+        if let Ok(start_date) = NaiveDate::parse_from_str(&work_start_date, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let diff_days = (today - start_date).num_days();
+            let tenure = diff_days as f32 / 365.0;
+            Some(tenure)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    // 4. 根据任职时间和试用期计算试用期满到期提醒
+    let calculated_probation_end_reminder = {
+        let probation_period_str = get_cell_value(9); // 试用期(年)
+        if !position_entry_date.is_empty() && !probation_period_str.is_empty() {
+            if let Ok(position_date) = NaiveDate::parse_from_str(&position_entry_date, "%Y-%m-%d") {
+                if let Ok(probation_years) = probation_period_str.parse::<f32>() {
+                    // 计算试用期结束日期
+                    let end_date = position_date + Duration::days((probation_years * 365.0) as i64);
+                    Some(end_date.format("%Y-%m-%d").to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    };
+    
     let cadre_info = CadreInfo {
         id: None,
         serial_number: None, // 序号字段已移除
@@ -493,8 +567,12 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         current_level_date: Some(current_level_date), // 任现职级时间 (已标准化)
         position_entry_date: Some(position_entry_date), // 任职时间 (已标准化)
         probation_period: Some(get_cell_value(9)), // 试用期(年)
-        probation_end_reminder: Some(probation_end_reminder), // 试用期满到期提醒 (已标准化)
-        id_number: Some(get_cell_value(11)), // 身份证号
+        probation_end_reminder: if let Some(date) = &calculated_probation_end_reminder {
+            Some(date.clone())
+        } else {
+            Some(probation_end_reminder) // 如果没有计算出结果，则使用模板中的值
+        }, // 试用期满到期提醒 (已标准化)
+        id_number: Some(id_number), // 身份证号
         technical_position: Some(get_cell_value(12)), // 专业技术职务
         education: Some(get_cell_value(13)), // 最高学历
         full_time_education: Some(get_cell_value(14)), // 全日制学历
@@ -504,35 +582,45 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         political_status: Some(get_cell_value(18)), // 政治面貌
         party_entry_date: Some(party_entry_date), // 入党时间 (已标准化)
         phone: Some(get_cell_value(20)), // 联系电话
-        birth_date: Some(birth_date), // 出生日期 (已标准化)
-        age: {
+        birth_date: if let Some(date) = &calculated_birth_date {
+            Some(date.clone())
+        } else {
+            Some(birth_date) // 如果没有计算出结果，则使用模板中的值
+        }, // 出生日期 (已标准化)
+        age: if let Some(age) = calculated_age {
+            Some(age)
+        } else {
             let age_str = get_cell_value(22); // 年龄
             if !age_str.is_empty() {
                 age_str.parse::<i32>().ok()
             } else {
                 None
             }
-        },
+        }, // 年龄
         native_place: Some(get_cell_value(23)), // 籍贯
         birth_place: Some(get_cell_value(24)), // 出生地
         ethnicity: Some(get_cell_value(25)), // 民族
-        company_tenure: {
+        company_tenure: if let Some(tenure) = calculated_company_tenure {
+            Some(tenure)
+        } else {
             let tenure_str = get_cell_value(26); // 司龄(年)
             if !tenure_str.is_empty() {
                 tenure_str.parse::<f32>().ok()
             } else {
                 None
             }
-        },
+        }, // 司龄(年)
         work_start_date: Some(work_start_date), // 参加工作时间 (已标准化)
-        work_tenure: {
+        work_tenure: if let Some(tenure) = calculated_work_tenure {
+            Some(tenure)
+        } else {
             let tenure_str = get_cell_value(28); // 工龄(年)
             if !tenure_str.is_empty() {
                 tenure_str.parse::<f32>().ok()
             } else {
                 None
             }
-        },
+        }, // 工龄(年)
         remarks: Some(get_cell_value(29)), // 备注
         major: None, // 专业字段（未在Excel中使用）
         contact_date: None, // 联系日期字段（未在Excel中使用）
