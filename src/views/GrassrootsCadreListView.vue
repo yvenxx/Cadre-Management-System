@@ -780,27 +780,27 @@ const filteredCadreList = computed(() => {
     }
     
     // 部门筛选
-    if (filters.value.department && !cadre.department.includes(filters.value.department)) {
+    if (filters.value.department && cadre.department !== filters.value.department) {
       return false;
     }
     
     // 科室筛选
-    if (filters.value.section && !cadre.section.includes(filters.value.section)) {
+    if (filters.value.section && cadre.section !== filters.value.section) {
       return false;
     }
     
     // 职务1筛选
-    if (filters.value.position1 && !cadre.position1.includes(filters.value.position1)) {
+    if (filters.value.position1 && cadre.position1 !== filters.value.position1) {
       return false;
     }
     
     // 职务2筛选
-    if (filters.value.position2 && !cadre.position2.includes(filters.value.position2)) {
+    if (filters.value.position2 && cadre.position2 !== filters.value.position2) {
       return false;
     }
     
     // 学历筛选
-    if (filters.value.education && !cadre.education.includes(filters.value.education)) {
+    if (filters.value.education && cadre.education !== filters.value.education) {
       return false;
     }
     
@@ -815,17 +815,17 @@ const filteredCadreList = computed(() => {
     }
     
     // 籍贯筛选
-    if (filters.value.nativePlace && !cadre.native_place.includes(filters.value.nativePlace)) {
+    if (filters.value.nativePlace && cadre.native_place !== filters.value.nativePlace) {
       return false;
     }
     
     // 民族筛选
-    if (filters.value.ethnicity && !cadre.ethnicity.includes(filters.value.ethnicity)) {
+    if (filters.value.ethnicity && cadre.ethnicity !== filters.value.ethnicity) {
       return false;
     }
     
     // 专业技术职务筛选
-    if (filters.value.technicalPosition && !cadre.technical_position.includes(filters.value.technicalPosition)) {
+    if (filters.value.technicalPosition && cadre.technical_position !== filters.value.technicalPosition) {
       return false;
     }
     
