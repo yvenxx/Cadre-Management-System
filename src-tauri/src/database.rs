@@ -48,8 +48,18 @@ impl Database {
     pub fn new() -> Result<Self> {
         // Create the database directory if it doesn't exist
         let db_dir = "data";
-        if !fs::metadata(db_dir).is_ok() {
-            fs::create_dir(db_dir).expect("Failed to create data directory");
+        if let Err(e) = fs::metadata(db_dir) {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                fs::create_dir(db_dir).map_err(|e| rusqlite::Error::SqliteFailure(
+                    rusqlite::ffi::Error::new(1), 
+                    Some(format!("Failed to create data directory: {}", e))
+                ))?;
+            } else {
+                return Err(rusqlite::Error::SqliteFailure(
+                    rusqlite::ffi::Error::new(1), 
+                    Some(format!("Failed to check data directory: {}", e))
+                ));
+            }
         }
         
         let conn = Connection::open("data/cadre.db")?;
@@ -137,6 +147,32 @@ impl Database {
         )
     }
     
+    pub fn get_distinct_field_values(&self, field_name: &str) -> Result<Vec<String>> {
+        // 验证字段名以防止SQL注入
+        let allowed_fields = [
+            "gender", "department", "section", "position1", "position2", "education", 
+            "political_status", "technical_position", "ethnicity", "native_place", "birth_place",
+            "full_time_education", "part_time_education"
+        ];
+        
+        if !allowed_fields.contains(&field_name) {
+            return Err(rusqlite::Error::SqliteFailure(
+                rusqlite::ffi::Error::new(1),
+                Some("Invalid field name".to_string())
+            ));
+        }
+        
+        let query = format!("SELECT DISTINCT {} FROM cadre_info WHERE {} IS NOT NULL AND {} != '' ORDER BY {}", 
+                           field_name, field_name, field_name, field_name);
+        let mut stmt = self.conn.prepare(&query)?;
+        
+        let values: Result<Vec<String>, _> = stmt.query_map([], |row| {
+            row.get(0)
+        })?.collect();
+        
+        values
+    }
+    
     pub fn get_all_cadres(&self) -> Result<Vec<CadreInfo>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, serial_number, name, gender, department, section, position1, position2,
@@ -177,15 +213,15 @@ impl Database {
                 political_status: row.get(23)?,
                 party_entry_date: row.get(24)?,
                 contact_date: row.get(25)?,
-                age: row.get(26).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                age: row.get(26)?,
                 native_place: row.get(27)?,
                 birth_place: row.get(28)?,
                 birth_date: row.get(29)?,
                 ethnicity: row.get(30)?,
                 special_date: row.get(31)?,
-                company_tenure: row.get(32).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                company_tenure: row.get(32)?,
                 work_start_date: row.get(33)?,
-                work_tenure: row.get(34).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                work_tenure: row.get(34)?,
             })
         })?;
         
@@ -237,15 +273,15 @@ impl Database {
                 political_status: row.get(23)?,
                 party_entry_date: row.get(24)?,
                 contact_date: row.get(25)?,
-                age: row.get(26).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                age: row.get(26)?,
                 native_place: row.get(27)?,
                 birth_place: row.get(28)?,
                 birth_date: row.get(29)?,
                 ethnicity: row.get(30)?,
                 special_date: row.get(31)?,
-                company_tenure: row.get(32).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                company_tenure: row.get(32)?,
                 work_start_date: row.get(33)?,
-                work_tenure: row.get(34).ok().unwrap_or(None), // 手动处理可能的 NULL 值
+                work_tenure: row.get(34)?,
             })
         })?;
         

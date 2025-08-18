@@ -1,5 +1,5 @@
 <template>
-  <el-config-provider :locale="zhCn">
+  <el-config-provider>
     <div id="app">
       <Layout />
     </div>
@@ -7,13 +7,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import Layout from "./components/Layout.vue";
-import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 </script>
 
 <style>
-/* 全局样式修复 */
 html, body {
   height: 100%;
   margin: 0;

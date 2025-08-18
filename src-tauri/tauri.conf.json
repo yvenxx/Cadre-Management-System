@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "cadremanagementsystem",
+  "productName": "干部管理系统",
   "version": "0.1.0",
   "identifier": "com.yven.cadremanagementsystem",
   "build": {
@@ -12,13 +12,18 @@
   "app": {
     "windows": [
       {
-        "title": "cadremanagementsystem",
-        "width": 800,
-        "height": 600
+        "title": "干部管理系统",
+        "width": 1280,
+        "height": 720,
+        "minWidth": 1280,
+        "minHeight": 720
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true
+      }
     }
   },
   "bundle": {
@@ -30,6 +35,17 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": true
+      },
+      "wix": {
+        "language": "zh-CN"
+      }
+    }
+  },
+  "plugins": {
+    "dialog": null
   }
 }
