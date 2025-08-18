@@ -516,6 +516,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from '@tauri-apps/plugin-dialog';
+import { ElMessageBox } from 'element-plus';
 import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
@@ -1204,11 +1205,24 @@ function editCadre(cadre) {
 
 // 删除干部信息
 async function deleteCadre(id) {
-  if (confirm("确定要删除这条记录吗？")) {
-    try {
-      await invoke("delete_cadre_info", { id });
-      loadCadreInfo();
-    } catch (error) {
+  try {
+    // 使用 Element Plus 的确认框
+    await ElMessageBox.confirm(
+      '确定要删除这条记录吗？',
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+    
+    // 用户点击确定后执行删除操作
+    await invoke("delete_cadre_info", { id });
+    loadCadreInfo();
+  } catch (error) {
+    // 用户点击取消或删除失败时的处理
+    if (error !== 'cancel') {
       console.error("删除干部信息失败:", error);
       // 使用更友好的错误提示
       let errorMessage = "删除干部信息失败";
