@@ -251,8 +251,8 @@ fn export_midlevel_cadre_info_to_excel(
 
 
 #[tauri::command]
-fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: String) -> Result<String, String> {
-    println!("开始从Excel文件导入干部信息: {}", file_path);
+fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: String, is_midlevel: bool) -> Result<String, String> {
+    println!("开始从Excel文件导入干部信息: {}, 是否为中层: {}", file_path, is_midlevel);
     
     // 读取Excel文件
     let mut workbook: Sheets<_> = open_workbook_auto(&file_path)
@@ -304,26 +304,53 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
         println!("处理第{}行数据", row_index + 1);
         
         // 解析每列数据
-        match parse_cadre_info_from_row(row, row_index + 1) {
-            Ok(cadre_info) => {
-                println!("第{}行数据解析成功: {:?}", row_index + 1, cadre_info.name);
-                // 插入数据库
-                match db_guard.add_grassroots_cadre(&cadre_info) {
-                    Ok(_) => {
-                        imported_count += 1;
-                        println!("成功导入第{}行数据", row_index + 1);
-                    },
-                    Err(e) => {
-                        let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
-                        error_details.push(error_msg);
-                        eprintln!("导入第{}行数据失败: {}", row_index + 1, e);
+        if is_midlevel {
+            // 导入中层管理人员数据
+            match parse_midlevel_cadre_info_from_row(row, row_index + 1) {
+                Ok(cadre_info) => {
+                    println!("第{}行数据解析成功: {:?}", row_index + 1, cadre_info.name);
+                    // 插入数据库
+                    match db_guard.add_midlevel_cadre(&cadre_info) {
+                        Ok(_) => {
+                            imported_count += 1;
+                            println!("成功导入第{}行数据", row_index + 1);
+                        },
+                        Err(e) => {
+                            let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
+                            error_details.push(error_msg);
+                            eprintln!("导入第{}行数据失败: {}", row_index + 1, e);
+                        }
                     }
+                },
+                Err(e) => {
+                    let error_msg = format!("第{}行数据解析失败: {}", row_index + 1, e);
+                    error_details.push(error_msg);
+                    eprintln!("解析第{}行数据失败: {}", row_index + 1, e);
                 }
-            },
-            Err(e) => {
-                let error_msg = format!("第{}行数据解析失败: {}", row_index + 1, e);
-                error_details.push(error_msg);
-                eprintln!("解析第{}行数据失败: {}", row_index + 1, e);
+            }
+        } else {
+            // 导入基层管理人员数据
+            match parse_cadre_info_from_row(row, row_index + 1) {
+                Ok(cadre_info) => {
+                    println!("第{}行数据解析成功: {:?}", row_index + 1, cadre_info.name);
+                    // 插入数据库
+                    match db_guard.add_grassroots_cadre(&cadre_info) {
+                        Ok(_) => {
+                            imported_count += 1;
+                            println!("成功导入第{}行数据", row_index + 1);
+                        },
+                        Err(e) => {
+                            let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
+                            error_details.push(error_msg);
+                            eprintln!("导入第{}行数据失败: {}", row_index + 1, e);
+                        }
+                    }
+                },
+                Err(e) => {
+                    let error_msg = format!("第{}行数据解析失败: {}", row_index + 1, e);
+                    error_details.push(error_msg);
+                    eprintln!("解析第{}行数据失败: {}", row_index + 1, e);
+                }
             }
         }
     }
@@ -555,6 +582,219 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
         gender: Some(gender), // 性别
         department: Some(department), // 部门
         section: Some(section), // 科室
+        position1: Some(position1), // 职务1
+        position2: Some(position2), // 职务2
+        company_entry_date: Some(company_entry_date), // 入司日期 (已标准化)
+        current_level_date: Some(current_level_date), // 任现职级时间 (已标准化)
+        position_entry_date: Some(position_entry_date), // 任职时间 (已标准化)
+        probation_period: Some(probation_period), // 试用期(年)
+        probation_end_reminder: if let Some(date) = &calculated_probation_end_reminder {
+            Some(date.clone())
+        } else {
+            Some(probation_end_reminder) // 如果没有计算出结果，则使用模板中的值
+        }, // 试用期满到期提醒 (已标准化)
+        id_number: Some(id_number), // 身份证号
+        technical_position: Some(technical_position), // 专业技术职务
+        education: Some(education), // 最高学历
+        full_time_education: Some(full_time_education), // 全日制学历
+        full_time_school_major: Some(full_time_school_major), // 全日制毕业院校系及专业
+        part_time_education: Some(part_time_education), // 在职学历
+        part_time_school_phone: Some(part_time_school_phone), // 在职毕业院校系及专业
+        political_status: Some(political_status), // 政治面貌
+        party_entry_date: Some(party_entry_date), // 入党时间 (已标准化)
+        phone: Some(phone), // 联系电话
+        birth_date: if let Some(date) = &calculated_birth_date {
+            Some(date.clone())
+        } else {
+            Some(birth_date) // 如果没有计算出结果，则使用模板中的值
+        }, // 出生日期 (已标准化)
+        age: if let Some(age) = calculated_age {
+            Some(age)
+        } else {
+            if !age_raw.is_empty() {
+                age_raw.parse::<i32>().ok()
+            } else {
+                None
+            }
+        }, // 年龄
+        native_place: Some(native_place), // 籍贯
+        birth_place: Some(birth_place), // 出生地
+        ethnicity: Some(ethnicity), // 民族
+        company_tenure: if let Some(tenure) = calculated_company_tenure {
+            Some(tenure)
+        } else {
+            if !company_tenure_raw.is_empty() {
+                company_tenure_raw.parse::<f32>().ok()
+            } else {
+                None
+            }
+        }, // 司龄(年)
+        work_start_date: Some(work_start_date), // 参加工作时间 (已标准化)
+        work_tenure: if let Some(tenure) = calculated_work_tenure {
+            Some(tenure)
+        } else {
+            if !work_tenure_raw.is_empty() {
+                work_tenure_raw.parse::<f32>().ok()
+            } else {
+                None
+            }
+        }, // 工龄(年)
+        remarks: Some(remarks), // 备注
+        major: None, // 专业字段（未在Excel中使用）
+        contact_date: None, // 联系日期字段（未在Excel中使用）
+        special_date: None, // 特殊日期字段（未在Excel中使用）
+    };
+    
+    println!("第{}行数据解析完成", row_index);
+    Ok(cadre_info)
+}
+
+// 从Excel行数据解析中层干部信息
+fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<MidLevelCadreInfo, String> {
+    println!("解析第{}行数据", row_index);
+    
+    // 辅助函数：安全获取单元格值
+    // 修改此函数以正确处理 Excel 的 DateTime 类型
+    let get_cell_value = |index: usize| -> String {
+        if index < row.len() {
+            match &row[index] {
+                Data::String(s) => s.clone(),
+                Data::Float(f) => f.to_string(),
+                Data::Int(i) => i.to_string(),
+                // 处理 Excel 的 DateTime 类型
+                Data::DateTime(d) => {
+                    convert_excel_date_to_string(d)
+                },
+                Data::Bool(b) => b.to_string(),
+                Data::Empty => String::new(),
+                _ => String::new(),
+            }
+        } else {
+            String::new()
+        }
+    };
+    
+    // 解析各字段 (按照新的列顺序，但跳过科室字段)
+    let name = get_cell_value(0); // 姓名
+    if name.trim().is_empty() {
+        return Err(format!("第{}行姓名不能为空", row_index));
+    }
+    
+    let gender = get_cell_value(1); // 性别
+    let department = get_cell_value(2); // 部门
+    // 注意：中层管理人员没有科室字段，所以跳过索引3
+    let position1 = get_cell_value(4); // 职务1
+    let position2 = get_cell_value(5); // 职务2
+    let company_entry_date_raw = get_cell_value(6); // 入司日期
+    let current_level_date_raw = get_cell_value(7); // 任现职级时间
+    let position_entry_date_raw = get_cell_value(8); // 任职时间
+    let probation_period = get_cell_value(9); // 试用期(年)
+    let probation_end_reminder_raw = get_cell_value(10); // 试用期满到期提醒
+    let id_number = get_cell_value(11); // 身份证号
+    let birth_date_raw = get_cell_value(12); // 出生日期
+    let age_raw = get_cell_value(13); // 年龄
+    let native_place = get_cell_value(14); // 籍贯
+    let birth_place = get_cell_value(15); // 出生地
+    let ethnicity = get_cell_value(16); // 民族
+    let company_tenure_raw = get_cell_value(17); // 司龄(年)
+    let work_start_date_raw = get_cell_value(18); // 参加工作时间
+    let work_tenure_raw = get_cell_value(19); // 工龄(年)
+    let technical_position = get_cell_value(20); // 专业技术职务
+    let education = get_cell_value(21); // 最高学历
+    let full_time_education = get_cell_value(22); // 全日制学历
+    let full_time_school_major = get_cell_value(23); // 全日制毕业院校系及专业
+    let part_time_education = get_cell_value(24); // 在职学历
+    let part_time_school_phone = get_cell_value(25); // 在职毕业院校系及专业
+    let political_status = get_cell_value(26); // 政治面貌
+    let party_entry_date_raw = get_cell_value(27); // 入党时间
+    let phone = get_cell_value(28); // 联系电话
+    let remarks = get_cell_value(29); // 备注
+    
+    // 对日期字段应用标准化函数
+    let company_entry_date = normalize_date_format(&company_entry_date_raw); // 入司日期
+    let current_level_date = normalize_date_format(&current_level_date_raw); // 任现职级时间
+    let position_entry_date = normalize_date_format(&position_entry_date_raw); // 任职时间
+    let probation_end_reminder = normalize_date_format(&probation_end_reminder_raw); // 试用期满到期提醒
+    let party_entry_date = normalize_date_format(&party_entry_date_raw); // 入党时间
+    let birth_date = normalize_date_format(&birth_date_raw); // 出生日期
+    let work_start_date = normalize_date_format(&work_start_date_raw); // 参加工作时间
+    
+    // 自动计算字段
+    // 1. 根据身份证号计算出生日期和年龄
+    let (calculated_birth_date, calculated_age) = if !id_number.is_empty() && id_number.len() == 18 {
+        // 提取出生日期 (第7-14位)
+        let birth_year = &id_number[6..10];
+        let birth_month = &id_number[10..12];
+        let birth_day = &id_number[12..14];
+        
+        // 创建日期字符串
+        let birth_date_str = format!("{}-{}-{}", birth_year, birth_month, birth_day);
+        
+        // 计算年龄
+        if let Ok(birth_date) = NaiveDate::parse_from_str(&birth_date_str, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let age = (today - birth_date).num_days() / 365;
+            (Some(birth_date_str), Some(age as i32))
+        } else {
+            (Some(birth_date_str), None)
+        }
+    } else {
+        (None, None)
+    };
+    
+    // 2. 根据入司日期计算司龄
+    let calculated_company_tenure = if !company_entry_date.is_empty() {
+        if let Ok(entry_date) = NaiveDate::parse_from_str(&company_entry_date, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let diff_days = (today - entry_date).num_days();
+            let tenure = diff_days as f32 / 365.0;
+            Some(tenure)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    // 3. 根据参加工作时间计算工龄
+    let calculated_work_tenure = if !work_start_date.is_empty() {
+        if let Ok(start_date) = NaiveDate::parse_from_str(&work_start_date, "%Y-%m-%d") {
+            let today = Local::now().naive_local().date();
+            let diff_days = (today - start_date).num_days();
+            let tenure = diff_days as f32 / 365.0;
+            Some(tenure)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    // 4. 根据任职时间和试用期计算试用期满到期提醒
+    let calculated_probation_end_reminder = {
+        if !position_entry_date.is_empty() && !probation_period.is_empty() {
+            if let Ok(position_date) = NaiveDate::parse_from_str(&position_entry_date, "%Y-%m-%d") {
+                if let Ok(probation_years) = probation_period.parse::<f32>() {
+                    // 计算试用期结束日期
+                    let end_date = position_date + Duration::days((probation_years * 365.0) as i64);
+                    Some(end_date.format("%Y-%m-%d").to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    };
+    
+    let cadre_info = MidLevelCadreInfo {
+        id: None,
+        serial_number: None, // 序号字段已移除
+        name: name,
+        gender: Some(gender), // 性别
+        department: Some(department), // 部门
         position1: Some(position1), // 职务1
         position2: Some(position2), // 职务2
         company_entry_date: Some(company_entry_date), // 入司日期 (已标准化)

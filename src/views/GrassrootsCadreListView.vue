@@ -1356,7 +1356,8 @@ async function performImport() {
     
     // 调用后端导入功能
     const result = await invoke("import_cadre_info_from_excel", { 
-      filePath: selected
+      filePath: selected,
+      isMidlevel: false
     });
     
     alert(result);
