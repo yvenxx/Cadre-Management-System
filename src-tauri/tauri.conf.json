@@ -39,6 +39,9 @@
     "windows": {
       "nsis": {
         "displayLanguageSelector": true
+      },
+      "wix": {
+        "language": "zh-CN"
       }
     }
   },
