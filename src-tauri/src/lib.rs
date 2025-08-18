@@ -5,7 +5,9 @@ use database::{Database, CadreInfo};
 use export::{ExportConfig, export_to_excel};
 use tauri::State;
 use std::sync::Mutex;
-use calamine::{open_workbook_auto, Reader, Sheets, Data};
+use calamine::{open_workbook_auto, Reader, Sheets, Data, ExcelDateTime};
+// 导入处理chrono日期所需的类型
+use chrono::{NaiveDate, Duration};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -374,18 +376,86 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
     Ok(result_message)
 }
 
+
+
+// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+
+// ... [greet function] ...
+
+// 辅助函数：标准化日期格式，支持 yyyy-mm-dd 和 yyyy/mm/dd
+// 同时处理 Excel 序列日期格式
+fn normalize_date_format(date_str: &str) -> String {
+    if date_str.is_empty() {
+        return String::new();
+    }
+    
+    // 如果是 yyyy/mm/dd 格式，转换为 yyyy-mm-dd
+    if date_str.contains('/') {
+        date_str.replace("/", "-")
+    } else {
+        // 如果已经是 yyyy-mm-dd 格式或其他格式，保持不变
+        date_str.to_string()
+    }
+}
+
+// 辅助函数：将 Excel 序列日期数转换为 yyyy-mm-dd 格式的字符串
+fn convert_excel_date_to_string(excel_date: &ExcelDateTime) -> String {
+    // 获取 Excel 序列日期数
+    let serial_date = excel_date.as_f64();
+    
+    // Excel 的日期系统有两种：
+    // 1. Windows 系统：以 1900 年 1 月 1 日为第 1 天 (但有一个错误，认为 1900 年是闰年)
+    // 2. Mac 系统：以 1904 年 1 月 1 日为第 1 天
+    // 这里我们假设使用 Windows 系统的日期系统 (1900-based)
+    // 1900 年 1 月 1 日对应的序列日期数是 1
+    // 但 chrono::NaiveDate 从 1970 年开始计算，所以我们需要先计算出距离 1970 年的天数
+    
+    // 1900 年 1 月 1 日距离 1970 年 1 月 1 日的天数 (负数)
+    // 但是 Excel 有一个著名的错误，它认为 1900 年是闰年（实际上不是）
+    // 这意味着在 1900 年 3 月 1 日之前，Excel 的日期会比实际多一天
+    // 我们需要处理这个错误
+    
+    // 计算从 1900-01-01 到 1970-01-01 的天数
+    // 1970-01-01 是 Excel 日期序列 25569 (对于 1900-based 系统)
+    // 但是由于 Excel 的 1900 闰年错误，实际的偏移量是 25568
+    let excel_epoch_days = 25568;
+    
+    // 将 Excel 序列日期数转换为距离 1970-01-01 的天数
+    let days_since_epoch = serial_date - excel_epoch_days as f64;
+    
+    // 将天数转换为 chrono::Duration
+    // Duration::days 需要一个 i64 类型的参数
+    let days = days_since_epoch.round() as i64;
+    
+    // 1970 年 1 月 1 日
+    let epoch = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
+    
+    // 计算目标日期
+    if let Some(target_date) = epoch.checked_add_signed(Duration::days(days)) {
+        target_date.format("%Y-%m-%d").to_string()
+    } else {
+        // 如果日期计算失败，返回原始字符串
+        excel_date.to_string()
+    }
+}
+
+
 // 从Excel行数据解析干部信息
 fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo, String> {
     println!("解析第{}行数据", row_index);
     
     // 辅助函数：安全获取单元格值
+    // 修改此函数以正确处理 Excel 的 DateTime 类型
     let get_cell_value = |index: usize| -> String {
         if index < row.len() {
             match &row[index] {
                 Data::String(s) => s.clone(),
                 Data::Float(f) => f.to_string(),
                 Data::Int(i) => i.to_string(),
-                Data::DateTime(d) => d.to_string(),
+                // 处理 Excel 的 DateTime 类型
+                Data::DateTime(d) => {
+                    convert_excel_date_to_string(d)
+                },
                 Data::Bool(b) => b.to_string(),
                 Data::Empty => String::new(),
                 _ => String::new(),
@@ -401,6 +471,15 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         return Err(format!("第{}行姓名不能为空", row_index));
     }
     
+    // 对日期字段应用标准化函数
+    let company_entry_date = normalize_date_format(&get_cell_value(6)); // 入司日期
+    let current_level_date = normalize_date_format(&get_cell_value(7)); // 任现职级时间
+    let position_entry_date = normalize_date_format(&get_cell_value(8)); // 任职时间
+    let probation_end_reminder = normalize_date_format(&get_cell_value(10)); // 试用期满到期提醒
+    let party_entry_date = normalize_date_format(&get_cell_value(19)); // 入党时间
+    let birth_date = normalize_date_format(&get_cell_value(21)); // 出生日期
+    let work_start_date = normalize_date_format(&get_cell_value(27)); // 参加工作时间
+    
     let cadre_info = CadreInfo {
         id: None,
         serial_number: None, // 序号字段已移除
@@ -410,11 +489,11 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         section: Some(get_cell_value(3)), // 科室
         position1: Some(get_cell_value(4)), // 职务1
         position2: Some(get_cell_value(5)), // 职务2
-        company_entry_date: Some(get_cell_value(6)), // 入司日期
-        current_level_date: Some(get_cell_value(7)), // 任现职级时间
-        position_entry_date: Some(get_cell_value(8)), // 任职时间
+        company_entry_date: Some(company_entry_date), // 入司日期 (已标准化)
+        current_level_date: Some(current_level_date), // 任现职级时间 (已标准化)
+        position_entry_date: Some(position_entry_date), // 任职时间 (已标准化)
         probation_period: Some(get_cell_value(9)), // 试用期(年)
-        probation_end_reminder: Some(get_cell_value(10)), // 试用期满到期提醒
+        probation_end_reminder: Some(probation_end_reminder), // 试用期满到期提醒 (已标准化)
         id_number: Some(get_cell_value(11)), // 身份证号
         technical_position: Some(get_cell_value(12)), // 专业技术职务
         education: Some(get_cell_value(13)), // 最高学历
@@ -423,9 +502,9 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
         part_time_education: Some(get_cell_value(16)), // 在职学历
         part_time_school_phone: Some(get_cell_value(17)), // 在职毕业院校系及专业
         political_status: Some(get_cell_value(18)), // 政治面貌
-        party_entry_date: Some(get_cell_value(19)), // 入党时间
+        party_entry_date: Some(party_entry_date), // 入党时间 (已标准化)
         phone: Some(get_cell_value(20)), // 联系电话
-        birth_date: Some(get_cell_value(21)), // 出生日期
+        birth_date: Some(birth_date), // 出生日期 (已标准化)
         age: {
             let age_str = get_cell_value(22); // 年龄
             if !age_str.is_empty() {
@@ -445,7 +524,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
                 None
             }
         },
-        work_start_date: Some(get_cell_value(27)), // 参加工作时间
+        work_start_date: Some(work_start_date), // 参加工作时间 (已标准化)
         work_tenure: {
             let tenure_str = get_cell_value(28); // 工龄(年)
             if !tenure_str.is_empty() {
@@ -463,6 +542,8 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<CadreInfo
     println!("第{}行数据解析完成", row_index);
     Ok(cadre_info)
 }
+
+// ... [其他函数] ...
 
 #[tauri::command]
 fn generate_import_template() -> Result<Vec<u8>, String> {
