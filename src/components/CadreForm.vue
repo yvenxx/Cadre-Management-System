@@ -95,12 +95,12 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col v-if="!isMidlevel" :span="8">
             <el-form-item label="科室">
               <el-input v-model="formData.section" placeholder="请输入科室名称" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="isMidlevel ? 16 : 8">
             <el-form-item label="职务1">
               <el-select v-model="formData.position1" placeholder="请选择或输入职务" filterable allow-create default-first-option clearable>
                 <el-option v-for="option in positionOptions" :key="option" :label="option" :value="option" />
@@ -353,6 +353,10 @@ const props = defineProps({
       contact_date: "",
       special_date: ""
     })
+  },
+  isMidlevel: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -429,30 +433,38 @@ const ethnicityOptions = [
 ];
 
 // 表单验证规则
-const formRules = {
-  name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' },
-    { min: 2, max: 20, message: '姓名长度在 2 到 20 个字符', trigger: 'blur' }
-  ],
-  gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
-  ],
-  id_number: [
-    { pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, message: '请输入有效的18位身份证号', trigger: 'blur' }
-  ],
-  department: [
-    { required: true, message: '请选择或输入部门', trigger: 'change' }
-  ],
-  section: [
-    { required: true, message: '请输入科室', trigger: 'blur' }
-  ],
-  position1: [
-    { required: true, message: '请选择或输入职务1', trigger: 'change' }
-  ],
-  phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号码', trigger: 'blur' }
-  ]
-};
+const formRules = computed(() => {
+  const rules = {
+    name: [
+      { required: true, message: '请输入姓名', trigger: 'blur' },
+      { min: 2, max: 20, message: '姓名长度在 2 到 20 个字符', trigger: 'blur' }
+    ],
+    gender: [
+      { required: true, message: '请选择性别', trigger: 'change' }
+    ],
+    id_number: [
+      { pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, message: '请输入有效的18位身份证号', trigger: 'blur' }
+    ],
+    department: [
+      { required: true, message: '请选择或输入部门', trigger: 'change' }
+    ],
+    position1: [
+      { required: true, message: '请选择或输入职务1', trigger: 'change' }
+    ],
+    phone: [
+      { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号码', trigger: 'blur' }
+    ]
+  };
+  
+  // 如果不是中层管理人员，则科室字段为必填
+  if (!props.isMidlevel) {
+    rules.section = [
+      { required: true, message: '请输入科室', trigger: 'blur' }
+    ];
+  }
+  
+  return rules;
+});
 
 // 计算属性：控制弹窗显示/隐藏
 const visible = computed({

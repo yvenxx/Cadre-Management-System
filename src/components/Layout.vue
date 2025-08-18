@@ -9,9 +9,13 @@
         class="menu"
         @select="handleMenuSelect"
       >
-        <el-menu-item index="cadre-list">
+        <el-menu-item index="grassroots-cadre-list">
           <i class="menu-icon">📋</i>
-          <span>管理人员信息表</span>
+          <span>基层管理人员信息表</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-cadre-list">
+          <i class="menu-icon">📋</i>
+          <span>中层管理人员信息表</span>
         </el-menu-item>
         <el-menu-item index="statistics">
           <i class="menu-icon">📊</i>
@@ -22,7 +26,8 @@
 
     <el-container>
       <el-main class="main-content">
-        <CadreListView v-if="activeMenu === 'cadre-list'" />
+        <GrassrootsCadreListView v-if="activeMenu === 'grassroots-cadre-list'" />
+        <MidLevelCadreListView v-else-if="activeMenu === 'midlevel-cadre-list'" />
         <StatisticsView v-else-if="activeMenu === 'statistics'" />
       </el-main>
       <el-footer class="app-footer-container">
@@ -34,11 +39,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import CadreListView from '../views/CadreListView.vue'
+import GrassrootsCadreListView from '../views/GrassrootsCadreListView.vue'
+import MidLevelCadreListView from '../views/MidLevelCadreListView.vue'
 import StatisticsView from '../views/StatisticsView.vue'
 import Footer from './Footer.vue'
 
-const activeMenu = ref('cadre-list')
+const activeMenu = ref('grassroots-cadre-list')
 
 const handleMenuSelect = (index) => {
   activeMenu.value = index

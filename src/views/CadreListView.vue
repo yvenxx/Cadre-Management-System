@@ -1494,7 +1494,7 @@ async function performExport(exportData) {
     // 重置导出筛选数据标识
     exportFilteredData.value = false;
     
-    await invoke("export_cadre_info_to_excel", { 
+    await invoke("export_grassroots_cadre_info_to_excel", { 
       filePath, 
       selectedFields: exportData.selectedFields,
       cadreIds // 如果为null则导出全部
