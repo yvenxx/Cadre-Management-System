@@ -12,7 +12,6 @@ use chrono::{NaiveDate, Duration, Local};
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
-    println!("执行greet命令，参数: {}", name);
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
@@ -23,17 +22,10 @@ fn export_grassroots_cadre_info_to_excel(
     selected_fields: Vec<String>,
     cadre_ids: Option<Vec<i32>> // 新增参数，用于部分导出
 ) -> Result<(), String> {
-    println!("开始执行export_grassroots_cadre_info_to_excel命令");
-    println!("文件路径: {}, 选择字段数: {}, 挌定ID数: {:?}", 
-             file_path, selected_fields.len(), cadre_ids.as_ref().map(|v| v.len()));
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
-            
             // 根据是否提供ID列表来决定导出全部还是部分数据
             let cadres = if let Some(ids) = cadre_ids {
-                println!("导出指定ID的数据，共{}个ID", ids.len());
                 // 导出指定ID的数据
                 let mut selected_cadres = Vec::new();
                 for id in ids {
@@ -43,18 +35,14 @@ fn export_grassroots_cadre_info_to_excel(
                 }
                 selected_cadres
             } else {
-                println!("导出全部数据");
                 // 导出全部数据
                 match db_guard.get_all_grassroots_cadres() {
                     Ok(cadres) => cadres,
                     Err(e) => {
-                        eprintln!("获取所有基层干部信息失败: {}", e);
                         return Err(format!("获取所有基层干部信息失败: {}", e));
                     }
                 }
             };
-            
-            println!("准备导出{}条记录", cadres.len());
             
             let mut config = ExportConfig::new(file_path);
             
@@ -62,7 +50,7 @@ fn export_grassroots_cadre_info_to_excel(
             config.set_fields(selected_fields.clone());
             
             // 添加数据
-            for (index, cadre) in cadres.iter().enumerate() {
+            for (_index, cadre) in cadres.iter().enumerate() {
                 let mut row_data = Vec::new();
                 for field in &selected_fields {
                     let value = match field.as_str() {
@@ -106,25 +94,18 @@ fn export_grassroots_cadre_info_to_excel(
                     row_data.push(value);
                 }
                 config.add_data_row(row_data);
-                if index % 100 == 0 {
-                    println!("已处理{}条记录", index);
-                }
             }
             
-            println!("开始执行导出操作");
             match export_to_excel(config) {
                 Ok(_) => {
-                    println!("导出操作完成");
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("导出操作失败: {}", e);
                     Err(format!("导出操作失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -142,17 +123,10 @@ fn export_midlevel_cadre_info_to_excel(
     selected_fields: Vec<String>,
     cadre_ids: Option<Vec<i32>> // 新增参数，用于部分导出
 ) -> Result<(), String> {
-    println!("开始执行export_midlevel_cadre_info_to_excel命令");
-    println!("文件路径: {}, 选择字段数: {}, 挌定ID数: {:?}", 
-             file_path, selected_fields.len(), cadre_ids.as_ref().map(|v| v.len()));
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
-            
             // 根据是否提供ID列表来决定导出全部还是部分数据
             let cadres = if let Some(ids) = cadre_ids {
-                println!("导出指定ID的数据，共{}个ID", ids.len());
                 // 导出指定ID的数据
                 let mut selected_cadres = Vec::new();
                 for id in ids {
@@ -162,18 +136,14 @@ fn export_midlevel_cadre_info_to_excel(
                 }
                 selected_cadres
             } else {
-                println!("导出全部数据");
                 // 导出全部数据
                 match db_guard.get_all_midlevel_cadres() {
                     Ok(cadres) => cadres,
                     Err(e) => {
-                        eprintln!("获取所有中层干部信息失败: {}", e);
                         return Err(format!("获取所有中层干部信息失败: {}", e));
                     }
                 }
             };
-            
-            println!("准备导出{}条记录", cadres.len());
             
             let mut config = ExportConfig::new(file_path);
             
@@ -181,7 +151,7 @@ fn export_midlevel_cadre_info_to_excel(
             config.set_fields(selected_fields.clone());
             
             // 添加数据
-            for (index, cadre) in cadres.iter().enumerate() {
+            for (_index, cadre) in cadres.iter().enumerate() {
                 let mut row_data = Vec::new();
                 for field in &selected_fields {
                     let value = match field.as_str() {
@@ -225,25 +195,18 @@ fn export_midlevel_cadre_info_to_excel(
                     row_data.push(value);
                 }
                 config.add_data_row(row_data);
-                if index % 100 == 0 {
-                    println!("已处理{}条记录", index);
-                }
             }
             
-            println!("开始执行导出操作");
             match export_to_excel(config) {
                 Ok(_) => {
-                    println!("导出操作完成");
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("导出操作失败: {}", e);
                     Err(format!("导出操作失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -252,8 +215,6 @@ fn export_midlevel_cadre_info_to_excel(
 
 #[tauri::command]
 fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: String, is_midlevel: bool) -> Result<String, String> {
-    println!("开始从Excel文件导入干部信息: {}, 是否为中层: {}", file_path, is_midlevel);
-    
     // 读取Excel文件
     let mut workbook: Sheets<_> = open_workbook_auto(&file_path)
         .map_err(|e| format!("无法打开Excel文件: {}", e))?;
@@ -265,15 +226,11 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
     }
     
     let first_sheet_name = sheet_names[0].clone();
-    println!("读取工作表: {}", first_sheet_name);
     
     // 获取工作表数据
     let worksheet = workbook
         .worksheet_range(&first_sheet_name)
         .map_err(|e| format!("无法读取工作表: {}", e))?;
-    
-    // 打印工作表的行数和列数
-    println!("工作表尺寸: {}行 x {}列", worksheet.height(), worksheet.width());
     
     // 获取数据库连接
     let db_guard = db.lock()
@@ -284,72 +241,57 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
     
     // 解析每一行数据（跳过第一行表头）
     for (row_index, row) in worksheet.rows().enumerate() {
-        println!("读取第{}行数据，行数据: {:?}", row_index + 1, row);
-        
         // 跳过第一行表头
         if row_index < 1 {
-            println!("跳过第{}行（表头行）", row_index + 1);
             continue;
         }
         
         // 检查是否是空行
         let is_empty_row = row.iter().all(|cell| matches!(cell, Data::Empty));
-        println!("第{}行是否为空行: {}", row_index + 1, is_empty_row);
         
         if is_empty_row {
-            println!("跳过第{}行（空行）", row_index + 1);
             continue;
         }
-        
-        println!("处理第{}行数据", row_index + 1);
         
         // 解析每列数据
         if is_midlevel {
             // 导入中层管理人员数据
             match parse_midlevel_cadre_info_from_row(row, row_index + 1) {
                 Ok(cadre_info) => {
-                    println!("第{}行数据解析成功: {:?}", row_index + 1, cadre_info.name);
                     // 插入数据库
                     match db_guard.add_midlevel_cadre(&cadre_info) {
                         Ok(_) => {
                             imported_count += 1;
-                            println!("成功导入第{}行数据", row_index + 1);
                         },
                         Err(e) => {
                             let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
                             error_details.push(error_msg);
-                            eprintln!("导入第{}行数据失败: {}", row_index + 1, e);
                         }
                     }
                 },
                 Err(e) => {
                     let error_msg = format!("第{}行数据解析失败: {}", row_index + 1, e);
                     error_details.push(error_msg);
-                    eprintln!("解析第{}行数据失败: {}", row_index + 1, e);
                 }
             }
         } else {
             // 导入基层管理人员数据
             match parse_cadre_info_from_row(row, row_index + 1) {
                 Ok(cadre_info) => {
-                    println!("第{}行数据解析成功: {:?}", row_index + 1, cadre_info.name);
                     // 插入数据库
                     match db_guard.add_grassroots_cadre(&cadre_info) {
                         Ok(_) => {
                             imported_count += 1;
-                            println!("成功导入第{}行数据", row_index + 1);
                         },
                         Err(e) => {
                             let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
                             error_details.push(error_msg);
-                            eprintln!("导入第{}行数据失败: {}", row_index + 1, e);
                         }
                     }
                 },
                 Err(e) => {
                     let error_msg = format!("第{}行数据解析失败: {}", row_index + 1, e);
                     error_details.push(error_msg);
-                    eprintln!("解析第{}行数据失败: {}", row_index + 1, e);
                 }
             }
         }
@@ -365,8 +307,6 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
             result_message.push_str(&format!("\n- {}", error));
         }
     }
-    
-    println!("{}", result_message);
     
     Ok(result_message)
 }
@@ -437,8 +377,6 @@ fn convert_excel_date_to_string(excel_date: &ExcelDateTime) -> String {
 
 // 从Excel行数据解析基层干部信息
 fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<GrassrootsCadreInfo, String> {
-    println!("解析第{}行数据", row_index);
-    
     // 辅助函数：安全获取单元格值
     // 修改此函数以正确处理 Excel 的 DateTime 类型
     let get_cell_value = |index: usize| -> String {
@@ -645,14 +583,11 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
         special_date: None, // 特殊日期字段（未在Excel中使用）
     };
     
-    println!("第{}行数据解析完成", row_index);
     Ok(cadre_info)
 }
 
 // 从Excel行数据解析中层干部信息
 fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<MidLevelCadreInfo, String> {
-    println!("解析第{}行数据", row_index);
-    
     // 辅助函数：安全获取单元格值
     // 修改此函数以正确处理 Excel 的 DateTime 类型
     let get_cell_value = |index: usize| -> String {
@@ -858,7 +793,6 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
         special_date: None, // 特殊日期字段（未在Excel中使用）
     };
     
-    println!("第{}行数据解析完成", row_index);
     Ok(cadre_info)
 }
 
@@ -866,8 +800,6 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
 
 #[tauri::command]
 fn generate_import_template() -> Result<Vec<u8>, String> {
-    println!("开始生成Excel导入模板");
-    
     // 创建内存中的工作簿
     let mut workbook = simple_excel_writer::Workbook::create_in_memory();
     
@@ -921,15 +853,12 @@ fn generate_import_template() -> Result<Vec<u8>, String> {
     
     match result {
         Ok(Some(buffer)) => {
-            println!("Excel导入模板生成成功，大小: {} 字节", buffer.len());
             Ok(buffer)
         },
         Ok(None) => {
-            println!("Excel导入模板生成成功，但没有数据");
             Ok(Vec::new())
         },
         Err(e) => {
-            eprintln!("保存Excel模板失败: {}", e);
             Err(format!("保存Excel模板失败: {}", e))
         }
     }
@@ -937,8 +866,6 @@ fn generate_import_template() -> Result<Vec<u8>, String> {
 
 #[tauri::command]
 fn save_import_template(file_path: String) -> Result<(), String> {
-    println!("开始生成并保存Excel导入模板到: {}", file_path);
-    
     // 生成模板数据
     let template_data = generate_import_template()?;
     
@@ -946,7 +873,6 @@ fn save_import_template(file_path: String) -> Result<(), String> {
     std::fs::write(&file_path, template_data)
         .map_err(|e| format!("保存Excel模板到文件失败: {}", e))?;
     
-    println!("Excel导入模板已保存到: {}", file_path);
     Ok(())
 }
 
@@ -954,25 +880,18 @@ fn save_import_template(file_path: String) -> Result<(), String> {
 
 #[tauri::command]
 fn add_grassroots_cadre_info(db: State<'_, Mutex<Database>>, cadre: GrassrootsCadreInfo) -> Result<(), String> {
-    println!("开始执行add_grassroots_cadre_info命令");
-    println!("接收到的基层干部信息: {:?}", cadre);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.add_grassroots_cadre(&cadre) {
-                Ok(result) => {
-                    println!("添加基层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("添加基层干部信息失败: {}", e);
                     Err(format!("添加基层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -980,24 +899,18 @@ fn add_grassroots_cadre_info(db: State<'_, Mutex<Database>>, cadre: GrassrootsCa
 
 #[tauri::command]
 fn get_all_grassroots_cadre_info(db: State<'_, Mutex<Database>>) -> Result<Vec<GrassrootsCadreInfo>, String> {
-    println!("开始执行get_all_grassroots_cadre_info命令");
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.get_all_grassroots_cadres() {
                 Ok(cadres) => {
-                    println!("获取所有基层干部信息成功，共{}条记录", cadres.len());
                     Ok(cadres)
                 },
                 Err(e) => {
-                    eprintln!("获取所有基层干部信息失败: {}", e);
                     Err(format!("获取所有基层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1005,24 +918,18 @@ fn get_all_grassroots_cadre_info(db: State<'_, Mutex<Database>>) -> Result<Vec<G
 
 #[tauri::command]
 fn get_grassroots_cadre_info_by_id(db: State<'_, Mutex<Database>>, id: i32) -> Result<Option<GrassrootsCadreInfo>, String> {
-    println!("开始执行get_grassroots_cadre_info_by_id命令，ID: {}", id);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.get_grassroots_cadre_by_id(id) {
                 Ok(cadre) => {
-                    println!("根据ID获取基层干部信息完成");
                     Ok(cadre)
                 },
                 Err(e) => {
-                    eprintln!("根据ID获取基层干部信息失败: {}", e);
                     Err(format!("根据ID获取基层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1030,25 +937,18 @@ fn get_grassroots_cadre_info_by_id(db: State<'_, Mutex<Database>>, id: i32) -> R
 
 #[tauri::command]
 fn update_grassroots_cadre_info(db: State<'_, Mutex<Database>>, cadre: GrassrootsCadreInfo) -> Result<(), String> {
-    println!("开始执行update_grassroots_cadre_info命令");
-    println!("接收到的基层干部信息: {:?}", cadre);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.update_grassroots_cadre(&cadre) {
-                Ok(result) => {
-                    println!("更新基层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("更新基层干部信息失败: {}", e);
                     Err(format!("更新基层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1056,24 +956,18 @@ fn update_grassroots_cadre_info(db: State<'_, Mutex<Database>>, cadre: Grassroot
 
 #[tauri::command]
 fn delete_grassroots_cadre_info(db: State<'_, Mutex<Database>>, id: i32) -> Result<(), String> {
-    println!("开始执行delete_grassroots_cadre_info命令，ID: {}", id);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.delete_grassroots_cadre(id) {
-                Ok(result) => {
-                    println!("删除基层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("删除基层干部信息失败: {}", e);
                     Err(format!("删除基层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1083,25 +977,18 @@ fn delete_grassroots_cadre_info(db: State<'_, Mutex<Database>>, id: i32) -> Resu
 
 #[tauri::command]
 fn add_midlevel_cadre_info(db: State<'_, Mutex<Database>>, cadre: MidLevelCadreInfo) -> Result<(), String> {
-    println!("开始执行add_midlevel_cadre_info命令");
-    println!("接收到的中层干部信息: {:?}", cadre);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.add_midlevel_cadre(&cadre) {
-                Ok(result) => {
-                    println!("添加中层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("添加中层干部信息失败: {}", e);
                     Err(format!("添加中层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1109,24 +996,18 @@ fn add_midlevel_cadre_info(db: State<'_, Mutex<Database>>, cadre: MidLevelCadreI
 
 #[tauri::command]
 fn get_all_midlevel_cadre_info(db: State<'_, Mutex<Database>>) -> Result<Vec<MidLevelCadreInfo>, String> {
-    println!("开始执行get_all_midlevel_cadre_info命令");
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.get_all_midlevel_cadres() {
                 Ok(cadres) => {
-                    println!("获取所有中层干部信息成功，共{}条记录", cadres.len());
                     Ok(cadres)
                 },
                 Err(e) => {
-                    eprintln!("获取所有中层干部信息失败: {}", e);
                     Err(format!("获取所有中层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1134,24 +1015,18 @@ fn get_all_midlevel_cadre_info(db: State<'_, Mutex<Database>>) -> Result<Vec<Mid
 
 #[tauri::command]
 fn get_midlevel_cadre_info_by_id(db: State<'_, Mutex<Database>>, id: i32) -> Result<Option<MidLevelCadreInfo>, String> {
-    println!("开始执行get_midlevel_cadre_info_by_id命令，ID: {}", id);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.get_midlevel_cadre_by_id(id) {
                 Ok(cadre) => {
-                    println!("根据ID获取中层干部信息完成");
                     Ok(cadre)
                 },
                 Err(e) => {
-                    eprintln!("根据ID获取中层干部信息失败: {}", e);
                     Err(format!("根据ID获取中层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1159,25 +1034,18 @@ fn get_midlevel_cadre_info_by_id(db: State<'_, Mutex<Database>>, id: i32) -> Res
 
 #[tauri::command]
 fn update_midlevel_cadre_info(db: State<'_, Mutex<Database>>, cadre: MidLevelCadreInfo) -> Result<(), String> {
-    println!("开始执行update_midlevel_cadre_info命令");
-    println!("接收到的中层干部信息: {:?}", cadre);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.update_midlevel_cadre(&cadre) {
-                Ok(result) => {
-                    println!("更新中层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("更新中层干部信息失败: {}", e);
                     Err(format!("更新中层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1185,24 +1053,18 @@ fn update_midlevel_cadre_info(db: State<'_, Mutex<Database>>, cadre: MidLevelCad
 
 #[tauri::command]
 fn delete_midlevel_cadre_info(db: State<'_, Mutex<Database>>, id: i32) -> Result<(), String> {
-    println!("开始执行delete_midlevel_cadre_info命令，ID: {}", id);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.delete_midlevel_cadre(id) {
-                Ok(result) => {
-                    println!("删除中层干部信息成功，影响行数: {}", result);
+                Ok(_result) => {
                     Ok(())
                 },
                 Err(e) => {
-                    eprintln!("删除中层干部信息失败: {}", e);
                     Err(format!("删除中层干部信息失败: {}", e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1210,24 +1072,18 @@ fn delete_midlevel_cadre_info(db: State<'_, Mutex<Database>>, id: i32) -> Result
 
 #[tauri::command]
 fn get_distinct_field_values_for_table(db: State<'_, Mutex<Database>>, table_name: String, field_name: String) -> Result<Vec<String>, String> {
-    println!("开始执行get_distinct_field_values_for_table命令，表名: {}, 字段名: {}", table_name, field_name);
-    
     match db.lock() {
         Ok(db_guard) => {
-            println!("获取数据库锁成功");
             match db_guard.get_distinct_field_values(&table_name, &field_name) {
                 Ok(values) => {
-                    println!("获取表{}字段{}的distinct值成功，共{}个值", table_name, field_name, values.len());
                     Ok(values)
                 },
                 Err(e) => {
-                    eprintln!("获取表{}字段{}的distinct值失败: {}", table_name, field_name, e);
                     Err(format!("获取表{}字段{}的distinct值失败: {}", table_name, field_name, e))
                 }
             }
         },
         Err(e) => {
-            eprintln!("获取数据库锁失败: {}", e);
             Err(format!("获取数据库锁失败: {}", e))
         }
     }
@@ -1235,22 +1091,16 @@ fn get_distinct_field_values_for_table(db: State<'_, Mutex<Database>>, table_nam
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
-    println!("初始化Tauri应用");
-    
     // 初始化数据库
-    println!("初始化数据库");
     let database = match Database::new() {
         Ok(db) => {
-            println!("数据库初始化成功");
             db
         },
         Err(e) => {
-            eprintln!("数据库初始化失败: {}", e);
             return Err(Box::new(e));
         }
     };
     
-    println!("启动Tauri Builder");
     tauri::Builder::default()
         .manage(Mutex::new(database))
         .plugin(tauri_plugin_opener::init())
@@ -1279,7 +1129,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         ])
         .run(tauri::generate_context!())
         .map_err(|e| {
-            eprintln!("Tauri应用运行失败: {}", e);
             Box::new(e) as Box<dyn std::error::Error>
         })
 }

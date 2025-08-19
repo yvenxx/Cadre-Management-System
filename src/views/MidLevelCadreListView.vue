@@ -1276,8 +1276,6 @@ function closeExportModal() {
 // 下载导入模板
 async function downloadImportTemplate() {
   try {
-    console.log("开始下载导入模板");
-    
     // 弹出文件保存对话框，让用户选择保存位置
     const { save } = await import('@tauri-apps/plugin-dialog');
     const filePath = await save({
@@ -1290,17 +1288,14 @@ async function downloadImportTemplate() {
     
     // 如果用户取消了保存对话框，则不执行下载
     if (!filePath) {
-      console.log("用户取消了保存操作");
       return;
     }
     
     // 调用后端直接保存模板到指定路径
     await invoke("save_import_template", { filePath });
     
-    console.log("导入模板保存完成，路径:", filePath);
     alert("导入模板已保存到: " + filePath);
   } catch (error) {
-    console.error("下载导入模板失败:", error);
     alert("下载导入模板失败: " + error);
   }
 }
@@ -1331,8 +1326,6 @@ async function performImport() {
       return;
     }
     
-    console.log("开始导入文件:", selected);
-    
     // 调用后端导入功能
     const result = await invoke("import_cadre_info_from_excel", { 
       filePath: selected,
@@ -1347,7 +1340,6 @@ async function performImport() {
     // 重新加载数据
     loadCadreInfo();
   } catch (error) {
-    console.error("导入失败:", error);
     alert("导入失败: " + error);
   } finally {
     importLoading.value = false;
@@ -1370,7 +1362,6 @@ function toggleFilterPanel() {
 // 应用筛选条件
 function applyFilters() {
   // 筛选逻辑将在模板中通过计算属性实现
-  console.log("应用筛选条件:", filters.value);
 }
 
 // 清空筛选条件

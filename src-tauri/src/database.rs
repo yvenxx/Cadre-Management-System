@@ -189,26 +189,12 @@ impl Database {
         )?;
         
         // Handle database migration - add part_time_school_phone column if it doesn't exist
-        match conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN part_time_school_phone TEXT", []) {
-            Ok(_) => println!("Successfully added part_time_school_phone column to grassroots_cadres"),
-            Err(_) => println!("part_time_school_phone column already exists or error occurred in grassroots_cadres"),
-        }
-        
-        match conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN part_time_school_phone TEXT", []) {
-            Ok(_) => println!("Successfully added part_time_school_phone column to midlevel_cadres"),
-            Err(_) => println!("part_time_school_phone column already exists or error occurred in midlevel_cadres"),
-        }
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN part_time_school_phone TEXT", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN part_time_school_phone TEXT", []);
         
         // Handle database migration - add birth_date column if it doesn't exist
-        match conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN birth_date TEXT", []) {
-            Ok(_) => println!("Successfully added birth_date column to grassroots_cadres"),
-            Err(_) => println!("birth_date column already exists or error occurred in grassroots_cadres"),
-        }
-        
-        match conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN birth_date TEXT", []) {
-            Ok(_) => println!("Successfully added birth_date column to midlevel_cadres"),
-            Err(_) => println!("birth_date column already exists or error occurred in midlevel_cadres"),
-        }
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN birth_date TEXT", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN birth_date TEXT", []);
         
         Ok(Database { conn })
     }
