@@ -380,6 +380,7 @@
           <el-button type="primary" @click="openAddModal" :icon="Plus">新增</el-button>
           <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0">导出选中</el-button>
           <el-button type="warning" @click="exportAllCadres" :icon="Download">导出全部</el-button>
+          <el-button type="info" @click="exportCadreRoster" :icon="Download">导出干部名册</el-button>
           <el-button type="info" @click="downloadImportTemplate" :icon="Download">下载模板</el-button>
           <el-button type="info" @click="openImportDialog" :icon="Upload">导入数据</el-button>
         </div>
@@ -1498,6 +1499,33 @@ async function performExport(exportData) {
     alert("导出成功！文件已保存为: " + filePath);
   } catch (error) {
     console.error("导出失败:", error);
+    alert("导出失败: " + error);
+  }
+}
+
+// 导出干部名册
+async function exportCadreRoster() {
+  try {
+    // 弹出文件保存对话框，让用户选择保存位置
+    const filePath = await save({
+      filters: [{
+        name: 'Excel Files',
+        extensions: ['xls']
+      }],
+      defaultPath: "基层管理人员名册.xls"
+    });
+    
+    // 如果用户取消了保存对话框，则不执行导出
+    if (!filePath) {
+      return;
+    }
+    
+    // 生成基层管理人员名册
+    await invoke("export_grassroots_cadre_roster", { outputPath: filePath });
+    
+    alert("导出成功！文件已保存为: " + filePath);
+  } catch (error) {
+    console.error("导出干部名册失败:", error);
     alert("导出失败: " + error);
   }
 }
