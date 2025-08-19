@@ -473,6 +473,7 @@ onMounted(() => {
   box-shadow: var(--card-shadow);
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: visible;
 }
 
 .content-section::before {

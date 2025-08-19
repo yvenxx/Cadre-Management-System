@@ -391,6 +391,7 @@
         style="width: 100%" 
         row-key="id"
         @selection-change="handleSelectionChange"
+        max-height="600"
       >
         <el-table-column type="selection" width="55" fixed />
         <el-table-column type="index" label="序号" width="60" fixed />
@@ -1561,9 +1562,8 @@ onMounted(() => {
   border-radius: 16px;
   box-shadow: var(--card-shadow);
   position: relative;
-  overflow: auto;
+  overflow: visible;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  max-height: calc(100vh - 50px);
 }
 
 .content-section::before {
