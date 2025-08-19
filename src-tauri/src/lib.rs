@@ -465,7 +465,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
             let today = Local::now().naive_local().date();
             let diff_days = (today - entry_date).num_days();
             let tenure = diff_days as f32 / 365.0;
-            Some(tenure)
+            Some((tenure * 10.0).round() / 10.0) // 保留一位小数
         } else {
             None
         }
@@ -479,7 +479,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
             let today = Local::now().naive_local().date();
             let diff_days = (today - start_date).num_days();
             let tenure = diff_days as f32 / 365.0;
-            Some(tenure)
+            Some((tenure * 10.0).round() / 10.0) // 保留一位小数
         } else {
             None
         }
@@ -637,7 +637,7 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
             let today = Local::now().naive_local().date();
             let diff_days = (today - entry_date).num_days();
             let tenure = diff_days as f32 / 365.0;
-            Some(tenure)
+            Some((tenure * 10.0).round() / 10.0) // 保留一位小数
         } else {
             None
         }
@@ -651,7 +651,7 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
             let today = Local::now().naive_local().date();
             let diff_days = (today - start_date).num_days();
             let tenure = diff_days as f32 / 365.0;
-            Some(tenure)
+            Some((tenure * 10.0).round() / 10.0) // 保留一位小数
         } else {
             None
         }
