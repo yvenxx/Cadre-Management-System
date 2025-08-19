@@ -1293,7 +1293,7 @@ async function downloadImportTemplate() {
     }
     
     // 调用后端直接保存模板到指定路径
-    await invoke("save_import_template", { filePath });
+    await invoke("save_import_template", { filePath, isMidlevel: true });
     
     alert("导入模板已保存到: " + filePath);
   } catch (error) {
