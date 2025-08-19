@@ -2065,34 +2065,19 @@ onMounted(() => {
   background-color: #ecf5ff;
 }
 
-/* 自定义滚动条样式，使其更显眼和易于操作 */
-.el-table__body-wrapper::-webkit-scrollbar,
-.el-table__header-wrapper::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+/* 修改Element Plus表格的横向滚动条大小 */
+.el-scrollbar__bar.is-horizontal {
+  height: 16px !important;
 }
 
-.el-table__body-wrapper::-webkit-scrollbar-track,
-.el-table__header-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 6px;
+.el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
+  height: 16px !important;
+  border-radius: 8px !important;
+  background-color: #c1c1c1 !important;
 }
 
-.el-table__body-wrapper::-webkit-scrollbar-thumb,
-.el-table__header-wrapper::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 6px;
-  border: 2px solid #f1f1f1;
-}
-
-.el-table__body-wrapper::-webkit-scrollbar-thumb:hover,
-.el-table__header-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-.el-table__body-wrapper::-webkit-scrollbar-corner,
-.el-table__header-wrapper::-webkit-scrollbar-corner {
-  background: #f1f1f1;
+.el-scrollbar__bar.is-horizontal .el-scrollbar__thumb:hover {
+  background-color: #a8a8a8 !important;
 }
 
 /* 表格容器样式，确保滚动条可见 */
