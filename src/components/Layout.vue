@@ -19,7 +19,11 @@
         </el-menu-item>
         <el-menu-item index="statistics">
           <i class="menu-icon">📊</i>
-          <span>信息结构统计</span>
+          <span>基层信息结构统计</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-statistics">
+          <i class="menu-icon">📊</i>
+          <span>中层信息结构统计</span>
         </el-menu-item>
         <el-menu-item index="grassroots-tenure">
           <i class="menu-icon">📅</i>
@@ -37,6 +41,7 @@
         <GrassrootsCadreListView v-if="activeMenu === 'grassroots-cadre-list'" />
         <MidLevelCadreListView v-else-if="activeMenu === 'midlevel-cadre-list'" />
         <StatisticsView v-else-if="activeMenu === 'statistics'" />
+        <MidlevelStatisticsView v-else-if="activeMenu === 'midlevel-statistics'" />
         <GrassrootsTenureView v-else-if="activeMenu === 'grassroots-tenure'" />
         <MidlevelTenureView v-else-if="activeMenu === 'midlevel-tenure'" />
       </el-main>
@@ -52,6 +57,7 @@ import { ref } from 'vue'
 import GrassrootsCadreListView from '../views/GrassrootsCadreListView.vue'
 import MidLevelCadreListView from '../views/MidLevelCadreListView.vue'
 import StatisticsView from '../views/StatisticsView.vue'
+import MidlevelStatisticsView from '../views/MidlevelStatisticsView.vue'
 import GrassrootsTenureView from '../views/GrassrootsTenureView.vue'
 import MidlevelTenureView from '../views/MidlevelTenureView.vue'
 import Footer from './Footer.vue'

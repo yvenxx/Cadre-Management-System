@@ -3,7 +3,7 @@
     <el-card class="content-section">
       <template #header>
         <div class="section-header">
-          <h2>基层信息结构统计</h2>
+          <h2>中层信息结构统计</h2>
         </div>
       </template>
       
@@ -225,10 +225,10 @@ const activeTab = ref("gender");
 
 // 干部数据
 const cadreList = ref([]);
-// 加载所有基层干部信息
+// 加载所有中层干部信息
 async function loadCadreInfo() {
   try {
-    const data = await invoke("get_all_grassroots_cadre_info");
+    const data = await invoke("get_all_midlevel_cadre_info");
     // 添加数据验证
     if (Array.isArray(data)) {
       cadreList.value = data;
@@ -237,23 +237,23 @@ async function loadCadreInfo() {
       cadreList.value = [];
     }
   } catch (error) {
-    console.error("加载基层干部信息失败:", error);
+    console.error("加载中层干部信息失败:", error);
     // 确保即使出错也不会导致界面崩溃
     cadreList.value = [];
   }
 }
 
-// 获取基层正职数（主任）
+// 获取中层正职数（部长）
 const chiefCount = computed(() => {
   return cadreList.value.filter(cadre => 
-    cadre.position1?.includes('主任') || cadre.position2?.includes('主任')
+    cadre.position1?.includes('部长') || cadre.position2?.includes('部长')
   ).length;
 });
 
-// 获取基层副职数（副主任）
+// 获取中层副职数（副部长）
 const viceCount = computed(() => {
   return cadreList.value.filter(cadre => 
-    cadre.position1?.includes('副主任') || cadre.position2?.includes('副主任')
+    cadre.position1?.includes('副部长') || cadre.position2?.includes('副部长')
   ).length;
 });
 
@@ -470,7 +470,7 @@ const partTimeTableData = computed(() => {
 // async function saveStatistics() {
 //   try {
 //     await invoke("save_statistics", {
-//       cadreType: "grassroots",
+//       cadreType: "midlevel",
 //       totalCount: cadreList.value.length,
 //       positionCount: positionCount.value
 //     });
@@ -485,11 +485,7 @@ const partTimeTableData = computed(() => {
 // 加载统计数据
 // async function loadStatistics() {
 //   try {
-//     const result = await invoke("get_statistics", { cadreType: "grassroots" });
-//     if (result) {
-//       const [totalCount, posCount] = result;
-//       positionCount.value = posCount;
-//     }
+//     const result = await invoke("get_statistics", { cadreType: "midlevel" });
 //   } catch (error) {
 //     console.error("加载统计数据失败:", error);
 //   }
