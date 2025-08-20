@@ -363,14 +363,50 @@
           </span>
         </div>
         <div class="export-buttons-group">
-          <el-button type="primary" @click="openAddModal" :icon="Plus">新增</el-button>
-          <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0">导出选中</el-button>
-          <el-button type="warning" @click="exportAllCadres" :icon="Download">导出全部</el-button>
-          <el-button type="info" @click="exportCadreRoster" :icon="Download">导出干部名册</el-button>
-          <el-button type="info" @click="downloadImportTemplate" :icon="Download">下载模板</el-button>
-          <el-button type="info" @click="openImportDialog" :icon="Upload">导入数据</el-button>
+          <el-button type="primary" @click="openAddModal" :icon="Plus" size="small">新增</el-button>
+          <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0" size="small">导出选中</el-button>
+          <el-button type="warning" @click="exportAllCadres" :icon="Download" size="small">导出全部</el-button>
+          <el-button type="info" @click="exportCadreRoster" :icon="Download" size="small">导出干部名册</el-button>
+          <el-button type="info" @click="downloadImportTemplate" :icon="Download" size="small">下载模板</el-button>
+          <el-button type="info" @click="openImportDialog" :icon="Upload" size="small">导入数据</el-button>
+          <el-button type="danger" @click="confirmDeleteAll" :icon="Delete" size="small">全部删除</el-button>
         </div>
       </div>
+
+      <!-- 删除确认对话框 -->
+      <el-dialog
+        v-model="showDeleteConfirmDialog"
+        title="确认删除"
+        width="30%"
+        center
+      >
+        <div style="text-align: center; padding: 20px;">
+          <el-alert
+            title="警告：此操作将删除所有数据，且不可恢复！"
+            type="error"
+            :closable="false"
+            show-icon
+          />
+          <p style="margin: 20px 0; font-size: 16px;">请输入"<strong style="color: red;">确认删除</strong>"以继续：</p>
+          <el-input 
+            v-model="deleteConfirmText" 
+            placeholder="请输入确认删除" 
+            style="margin-bottom: 20px;"
+          />
+        </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="showDeleteConfirmDialog = false">取消</el-button>
+            <el-button 
+              type="danger" 
+              @click="deleteAllCadres" 
+              :disabled="deleteConfirmText !== '确认删除'"
+            >
+              确认删除
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
 
       <!-- 数据表格 -->
       <el-table 
@@ -503,7 +539,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from '@tauri-apps/plugin-dialog';
 import { ElMessageBox } from 'element-plus';
-import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
+import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown, Delete } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
 
@@ -751,6 +787,10 @@ const filters = ref({
   partTimeSchoolPhone: "",
   remarks: ""
 });
+
+// 删除确认相关数据
+const showDeleteConfirmDialog = ref(false);
+const deleteConfirmText = ref("");
 
 // 构建筛选参数
 function buildFilterParams() {
@@ -1800,6 +1840,42 @@ async function loadDistinctFieldValues() {
   }
 }
 
+// 确认删除所有数据
+function confirmDeleteAll() {
+  showDeleteConfirmDialog.value = true;
+  deleteConfirmText.value = "";
+}
+
+// 删除所有干部数据
+async function deleteAllCadres() {
+  if (deleteConfirmText.value !== "确认删除") {
+    alert("请输入正确的确认文本！");
+    return;
+  }
+  
+  try {
+    // 获取所有干部的ID
+    const allCadres = await invoke("get_all_midlevel_cadre_info");
+    
+    // 逐个删除所有干部
+    for (const cadre of allCadres) {
+      await invoke("delete_midlevel_cadre_info", { id: cadre.id });
+    }
+    
+    // 关闭确认对话框
+    showDeleteConfirmDialog.value = false;
+    deleteConfirmText.value = "";
+    
+    // 重新加载数据
+    await loadCadreInfo();
+    
+    alert("所有数据已成功删除！");
+  } catch (error) {
+    console.error("删除所有数据失败:", error);
+    alert("删除失败: " + error);
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadCadreInfo();
@@ -1883,10 +1959,10 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 20px;
+  padding: 15px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   color: white;
 }
 
@@ -1895,18 +1971,23 @@ onMounted(() => {
 }
 
 .export-count-info {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: white;
   background: rgba(255, 255, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 15px;
   backdrop-filter: blur(10px);
 }
 
 .export-buttons-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+}
+
+.export-buttons-group .el-button {
+  font-size: 12px;
+  padding: 8px 12px;
 }
 
 .file-info {
