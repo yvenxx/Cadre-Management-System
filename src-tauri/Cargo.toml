@@ -30,4 +30,6 @@ chrono = "0.4" # 添加 chrono crate
 env_logger = "0.11"
 log = "0.4"
 once_cell = "1.19"
+rust_xlsxwriter = "0.90.0"
+edit-xlsx = "0.4.6"
 

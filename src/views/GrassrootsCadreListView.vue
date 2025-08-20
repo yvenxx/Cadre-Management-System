@@ -1510,9 +1510,9 @@ async function exportCadreRoster() {
     const filePath = await save({
       filters: [{
         name: 'Excel Files',
-        extensions: ['xls']
+        extensions: ['xlsx']
       }],
-      defaultPath: "基层管理人员名册.xls"
+      defaultPath: "基层管理人员名册.xlsx"
     });
     
     // 如果用户取消了保存对话框，则不执行导出

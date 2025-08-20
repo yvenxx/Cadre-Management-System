@@ -1083,99 +1083,126 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 // 使用模板导出基层管理人员名册
 #[tauri::command]
 fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String) -> Result<(), String> {
-    use std::path::Path;
-    use calamine::{Reader, open_workbook, DataType};
+    use std::fs;
+    use edit_xlsx::Write;
     
     // 获取数据库连接
     let db_guard = db.lock().map_err(|e| format!("获取数据库锁失败: {}", e))?;
     let cadres = db_guard.get_all_grassroots_cadres().map_err(|e| format!("获取基层干部信息失败: {}", e))?;
     
-    // 模板路径
-    let template_path = Path::new("templates/基层管理人员名册.xls");
+    // 获取当前可执行文件的目录
+    let exe_dir = std::env::current_exe()
+        .map_err(|e| format!("获取可执行文件路径失败: {}", e))?
+        .parent()
+        .ok_or("无法获取可执行文件所在目录")?
+        .to_path_buf();
+    
+    // 构建模板文件的完整路径
+    // 首先尝试在当前可执行文件目录的templates子目录中查找
+    let mut template_path = exe_dir.join("templates").join("基层管理人员名册.xlsx");
+    
+    // 如果找不到，则尝试在上一级目录的templates子目录中查找（开发环境）
+    if !template_path.exists() {
+        template_path = exe_dir.join("..").join("templates").join("基层管理人员名册.xlsx");
+    }
+    
+    // 如果还找不到，则尝试在src-tauri目录下的templates子目录中查找（开发环境）
+    if !template_path.exists() {
+        template_path = exe_dir.join("..").join("..").join("templates").join("基层管理人员名册.xlsx");
+    }
     
     // 检查模板是否存在
     if !template_path.exists() {
-        return Err("模板文件不存在".to_string());
+        // 获取当前工作目录，用于调试
+        let current_dir = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("unknown"));
+        return Err(format!("模板文件不存在。当前工作目录: {:?}, 尝试查找路径: {:?}", current_dir, template_path));
     }
     
-    // 读取模板文件
-    let mut template: calamine::Xlsx<_> = open_workbook(template_path).map_err(|e| format!("打开模板文件失败: {}", e))?;
-    let reader = template.worksheet_range("Sheet1")
-        .map_err(|e| format!("读取工作表失败: {}", e))?
-        .ok_or("模板中没有工作表")?;
+    // 复制模板文件到输出位置
+    fs::copy(&template_path, &output_path)
+        .map_err(|e| format!("复制模板文件失败: {}", e))?;
     
-    // 创建新的Excel文件
-    let mut workbook = simple_excel_writer::Workbook::create(&output_path);
-    let mut sheet = workbook.create_sheet("基层管理人员名册");
+    // 使用edit-xlsx库打开复制的文件并添加数据
+    let mut workbook = edit_xlsx::Workbook::from_path(&output_path)
+        .map_err(|e| format!("打开Excel文件失败: {}", e))?;
     
-    workbook.write_sheet(&mut sheet, |sheet_writer| {
-        use simple_excel_writer::*;
-        
-        let mut row_index = 0;
-        
-        // 复制模板的表头（前3行）
-        for (row_idx, row) in reader.rows().enumerate() {
-            if row_idx < 3 { // 只复制前3行表头
-                let header_row: Vec<String> = row.iter()
-                    .map(|cell| cell.get_string().unwrap_or("").to_string())
-                    .collect();
-                
-                sheet_writer.append_row(&header_row)?;
-                row_index += 1;
-            }
-        }
-        
-        // 从第4行开始写入数据
-        for (index, cadre) in cadres.iter().enumerate() {
-            // 安全获取字段值
-            let index_str = (index + 1).to_string();
-            let name = cadre.name.clone();
-            let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
-            let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
-            let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
-            let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
-            let work_start_date = cadre.work_start_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let party_entry_date = cadre.party_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let full_time_education = cadre.full_time_education.as_ref().unwrap_or(&"".to_string()).clone();
-            let full_time_school_major = cadre.full_time_school_major.as_ref().unwrap_or(&"".to_string()).clone();
-            let part_time_education = cadre.part_time_education.as_ref().unwrap_or(&"".to_string()).clone();
-            let part_time_school_phone = cadre.part_time_school_phone.as_ref().unwrap_or(&"".to_string()).clone();
-            let technical_position = cadre.technical_position.as_ref().unwrap_or(&"".to_string()).clone();
-            let position_entry_date = cadre.position_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let current_level_date = cadre.current_level_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let id_number = cadre.id_number.as_ref().unwrap_or(&"".to_string()).clone();
-            let phone = cadre.phone.as_ref().unwrap_or(&"".to_string()).clone();
-            let remarks = cadre.remarks.as_ref().unwrap_or(&"".to_string()).clone();
-            
-            // 写入数据行
-            sheet_writer.append_row(row![
-                index_str,
-                name,
-                gender,
-                position1,
-                birth_date,
-                ethnicity,
-                native_place,
-                work_start_date,
-                party_entry_date,
-                full_time_education,
-                full_time_school_major,
-                part_time_education,
-                part_time_school_phone,
-                technical_position,
-                position_entry_date,
-                current_level_date,
-                id_number,
-                phone,
-                remarks
-            ])?;
-        }
-        
-        Ok(())
-    }).map_err(|e| format!("创建Excel文件失败: {}", e))?;
+    // 获取第一个工作表
+    let worksheet = workbook.get_worksheet_mut(1)
+        .map_err(|e| format!("获取工作表失败: {}", e))?;
     
-    workbook.close().map_err(|e| format!("保存Excel文件失败: {}", e))?;
+    // 获取模板的行数，以确定从哪里开始添加数据
+    let template_row_count = worksheet.max_row() as usize;
+    let mut current_row = template_row_count + 1; // 从模板之后的行开始添加数据
+    
+    // 添加干部数据
+    for (index, cadre) in cadres.iter().enumerate() {
+        // 安全获取字段值
+        let index_str = (index + 1).to_string();
+        let name = cadre.name.clone();
+        let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
+        let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
+        let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
+        let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
+        let work_start_date = cadre.work_start_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let party_entry_date = cadre.party_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let full_time_education = cadre.full_time_education.as_ref().unwrap_or(&"".to_string()).clone();
+        let full_time_school_major = cadre.full_time_school_major.as_ref().unwrap_or(&"".to_string()).clone();
+        let part_time_education = cadre.part_time_education.as_ref().unwrap_or(&"".to_string()).clone();
+        let part_time_school_phone = cadre.part_time_school_phone.as_ref().unwrap_or(&"".to_string()).clone();
+        let technical_position = cadre.technical_position.as_ref().unwrap_or(&"".to_string()).clone();
+        let position_entry_date = cadre.position_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let current_level_date = cadre.current_level_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let id_number = cadre.id_number.as_ref().unwrap_or(&"".to_string()).clone();
+        let phone = cadre.phone.as_ref().unwrap_or(&"".to_string()).clone();
+        let remarks = cadre.remarks.as_ref().unwrap_or(&"".to_string()).clone();
+        
+        // 写入数据行
+        worksheet.write(&format!("A{}", current_row), index_str)
+            .map_err(|e| format!("写入索引失败: {}", e))?;
+        worksheet.write(&format!("B{}", current_row), name)
+            .map_err(|e| format!("写入姓名失败: {}", e))?;
+        worksheet.write(&format!("C{}", current_row), gender)
+            .map_err(|e| format!("写入性别失败: {}", e))?;
+        worksheet.write(&format!("D{}", current_row), position1)
+            .map_err(|e| format!("写入职务失败: {}", e))?;
+        worksheet.write(&format!("E{}", current_row), birth_date)
+            .map_err(|e| format!("写入出生日期失败: {}", e))?;
+        worksheet.write(&format!("F{}", current_row), ethnicity)
+            .map_err(|e| format!("写入民族失败: {}", e))?;
+        worksheet.write(&format!("G{}", current_row), native_place)
+            .map_err(|e| format!("写入籍贯失败: {}", e))?;
+        worksheet.write(&format!("H{}", current_row), work_start_date)
+            .map_err(|e| format!("写入参加工作时间失败: {}", e))?;
+        worksheet.write(&format!("I{}", current_row), party_entry_date)
+            .map_err(|e| format!("写入入党时间失败: {}", e))?;
+        worksheet.write(&format!("J{}", current_row), full_time_education)
+            .map_err(|e| format!("写入全日制学历失败: {}", e))?;
+        worksheet.write(&format!("K{}", current_row), full_time_school_major)
+            .map_err(|e| format!("写入全日制毕业院校失败: {}", e))?;
+        worksheet.write(&format!("L{}", current_row), part_time_education)
+            .map_err(|e| format!("写入在职学历失败: {}", e))?;
+        worksheet.write(&format!("M{}", current_row), part_time_school_phone)
+            .map_err(|e| format!("写入在职毕业院校失败: {}", e))?;
+        worksheet.write(&format!("N{}", current_row), technical_position)
+            .map_err(|e| format!("写入专业技术职务失败: {}", e))?;
+        worksheet.write(&format!("O{}", current_row), position_entry_date)
+            .map_err(|e| format!("写入任职时间失败: {}", e))?;
+        worksheet.write(&format!("P{}", current_row), current_level_date)
+            .map_err(|e| format!("写入任现职级时间失败: {}", e))?;
+        worksheet.write(&format!("Q{}", current_row), id_number)
+            .map_err(|e| format!("写入身份证号失败: {}", e))?;
+        worksheet.write(&format!("R{}", current_row), phone)
+            .map_err(|e| format!("写入联系电话失败: {}", e))?;
+        worksheet.write(&format!("S{}", current_row), remarks)
+            .map_err(|e| format!("写入备注失败: {}", e))?;
+        
+        current_row += 1;
+    }
+    
+    // 保存文件
+    workbook.save()
+        .map_err(|e| format!("保存Excel文件失败: {}", e))?;
     
     Ok(())
 }
@@ -1183,99 +1210,126 @@ fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: S
 // 使用模板导出中层管理人员名册
 #[tauri::command]
 fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String) -> Result<(), String> {
-    use std::path::Path;
-    use calamine::{Reader, open_workbook, DataType};
+    use std::fs;
+    use edit_xlsx::Write;
     
     // 获取数据库连接
     let db_guard = db.lock().map_err(|e| format!("获取数据库锁失败: {}", e))?;
     let cadres = db_guard.get_all_midlevel_cadres().map_err(|e| format!("获取中层干部信息失败: {}", e))?;
     
-    // 模板路径
-    let template_path = Path::new("templates/中层管理人员名册.xls");
+    // 获取当前可执行文件的目录
+    let exe_dir = std::env::current_exe()
+        .map_err(|e| format!("获取可执行文件路径失败: {}", e))?
+        .parent()
+        .ok_or("无法获取可执行文件所在目录")?
+        .to_path_buf();
+    
+    // 构建模板文件的完整路径
+    // 首先尝试在当前可执行文件目录的templates子目录中查找
+    let mut template_path = exe_dir.join("templates").join("中层管理人员名册.xlsx");
+    
+    // 如果找不到，则尝试在上一级目录的templates子目录中查找（开发环境）
+    if !template_path.exists() {
+        template_path = exe_dir.join("..").join("templates").join("中层管理人员名册.xlsx");
+    }
+    
+    // 如果还找不到，则尝试在src-tauri目录下的templates子目录中查找（开发环境）
+    if !template_path.exists() {
+        template_path = exe_dir.join("..").join("..").join("templates").join("中层管理人员名册.xlsx");
+    }
     
     // 检查模板是否存在
     if !template_path.exists() {
-        return Err("模板文件不存在".to_string());
+        // 获取当前工作目录，用于调试
+        let current_dir = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("unknown"));
+        return Err(format!("模板文件不存在。当前工作目录: {:?}, 尝试查找路径: {:?}", current_dir, template_path));
     }
     
-    // 读取模板文件
-    let mut template: calamine::Xlsx<_> = open_workbook(template_path).map_err(|e| format!("打开模板文件失败: {}", e))?;
-    let reader = template.worksheet_range("Sheet1")
-        .map_err(|e| format!("读取工作表失败: {}", e))?
-        .ok_or("模板中没有工作表")?;
+    // 复制模板文件到输出位置
+    fs::copy(&template_path, &output_path)
+        .map_err(|e| format!("复制模板文件失败: {}", e))?;
     
-    // 创建新的Excel文件
-    let mut workbook = simple_excel_writer::Workbook::create(&output_path);
-    let mut sheet = workbook.create_sheet("中层管理人员名册");
+    // 使用edit-xlsx库打开复制的文件并添加数据
+    let mut workbook = edit_xlsx::Workbook::from_path(&output_path)
+        .map_err(|e| format!("打开Excel文件失败: {}", e))?;
     
-    workbook.write_sheet(&mut sheet, |sheet_writer| {
-        use simple_excel_writer::*;
-        
-        let mut row_index = 0;
-        
-        // 复制模板的表头（前3行）
-        for (row_idx, row) in reader.rows().enumerate() {
-            if row_idx < 3 { // 只复制前3行表头
-                let header_row: Vec<String> = row.iter()
-                    .map(|cell| cell.get_string().unwrap_or("").to_string())
-                    .collect();
-                
-                sheet_writer.append_row(&header_row)?;
-                row_index += 1;
-            }
-        }
-        
-        // 从第4行开始写入数据
-        for (index, cadre) in cadres.iter().enumerate() {
-            // 安全获取字段值
-            let index_str = (index + 1).to_string();
-            let name = cadre.name.clone();
-            let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
-            let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
-            let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
-            let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
-            let work_start_date = cadre.work_start_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let party_entry_date = cadre.party_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let full_time_education = cadre.full_time_education.as_ref().unwrap_or(&"".to_string()).clone();
-            let full_time_school_major = cadre.full_time_school_major.as_ref().unwrap_or(&"".to_string()).clone();
-            let part_time_education = cadre.part_time_education.as_ref().unwrap_or(&"".to_string()).clone();
-            let part_time_school_phone = cadre.part_time_school_phone.as_ref().unwrap_or(&"".to_string()).clone();
-            let technical_position = cadre.technical_position.as_ref().unwrap_or(&"".to_string()).clone();
-            let position_entry_date = cadre.position_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let current_level_date = cadre.current_level_date.as_ref().unwrap_or(&"".to_string()).clone();
-            let id_number = cadre.id_number.as_ref().unwrap_or(&"".to_string()).clone();
-            let phone = cadre.phone.as_ref().unwrap_or(&"".to_string()).clone();
-            let remarks = cadre.remarks.as_ref().unwrap_or(&"".to_string()).clone();
-            
-            // 写入数据行
-            sheet_writer.append_row(row![
-                index_str,
-                name,
-                gender,
-                position1,
-                birth_date,
-                ethnicity,
-                native_place,
-                work_start_date,
-                party_entry_date,
-                full_time_education,
-                full_time_school_major,
-                part_time_education,
-                part_time_school_phone,
-                technical_position,
-                position_entry_date,
-                current_level_date,
-                id_number,
-                phone,
-                remarks
-            ])?;
-        }
-        
-        Ok(())
-    }).map_err(|e| format!("创建Excel文件失败: {}", e))?;
+    // 获取第一个工作表
+    let worksheet = workbook.get_worksheet_mut(1)
+        .map_err(|e| format!("获取工作表失败: {}", e))?;
     
-    workbook.close().map_err(|e| format!("保存Excel文件失败: {}", e))?;
+    // 获取模板的行数，以确定从哪里开始添加数据
+    let template_row_count = worksheet.max_row() as usize;
+    let mut current_row = template_row_count + 1; // 从模板之后的行开始添加数据
+    
+    // 添加干部数据
+    for (index, cadre) in cadres.iter().enumerate() {
+        // 安全获取字段值
+        let index_str = (index + 1).to_string();
+        let name = cadre.name.clone();
+        let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
+        let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
+        let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
+        let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
+        let work_start_date = cadre.work_start_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let party_entry_date = cadre.party_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let full_time_education = cadre.full_time_education.as_ref().unwrap_or(&"".to_string()).clone();
+        let full_time_school_major = cadre.full_time_school_major.as_ref().unwrap_or(&"".to_string()).clone();
+        let part_time_education = cadre.part_time_education.as_ref().unwrap_or(&"".to_string()).clone();
+        let part_time_school_phone = cadre.part_time_school_phone.as_ref().unwrap_or(&"".to_string()).clone();
+        let technical_position = cadre.technical_position.as_ref().unwrap_or(&"".to_string()).clone();
+        let position_entry_date = cadre.position_entry_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let current_level_date = cadre.current_level_date.as_ref().unwrap_or(&"".to_string()).clone();
+        let id_number = cadre.id_number.as_ref().unwrap_or(&"".to_string()).clone();
+        let phone = cadre.phone.as_ref().unwrap_or(&"".to_string()).clone();
+        let remarks = cadre.remarks.as_ref().unwrap_or(&"".to_string()).clone();
+        
+        // 写入数据行
+        worksheet.write(&format!("A{}", current_row), index_str)
+            .map_err(|e| format!("写入索引失败: {}", e))?;
+        worksheet.write(&format!("B{}", current_row), name)
+            .map_err(|e| format!("写入姓名失败: {}", e))?;
+        worksheet.write(&format!("C{}", current_row), gender)
+            .map_err(|e| format!("写入性别失败: {}", e))?;
+        worksheet.write(&format!("D{}", current_row), position1)
+            .map_err(|e| format!("写入职务失败: {}", e))?;
+        worksheet.write(&format!("E{}", current_row), birth_date)
+            .map_err(|e| format!("写入出生日期失败: {}", e))?;
+        worksheet.write(&format!("F{}", current_row), ethnicity)
+            .map_err(|e| format!("写入民族失败: {}", e))?;
+        worksheet.write(&format!("G{}", current_row), native_place)
+            .map_err(|e| format!("写入籍贯失败: {}", e))?;
+        worksheet.write(&format!("H{}", current_row), work_start_date)
+            .map_err(|e| format!("写入参加工作时间失败: {}", e))?;
+        worksheet.write(&format!("I{}", current_row), party_entry_date)
+            .map_err(|e| format!("写入入党时间失败: {}", e))?;
+        worksheet.write(&format!("J{}", current_row), full_time_education)
+            .map_err(|e| format!("写入全日制学历失败: {}", e))?;
+        worksheet.write(&format!("K{}", current_row), full_time_school_major)
+            .map_err(|e| format!("写入全日制毕业院校失败: {}", e))?;
+        worksheet.write(&format!("L{}", current_row), part_time_education)
+            .map_err(|e| format!("写入在职学历失败: {}", e))?;
+        worksheet.write(&format!("M{}", current_row), part_time_school_phone)
+            .map_err(|e| format!("写入在职毕业院校失败: {}", e))?;
+        worksheet.write(&format!("N{}", current_row), technical_position)
+            .map_err(|e| format!("写入专业技术职务失败: {}", e))?;
+        worksheet.write(&format!("O{}", current_row), position_entry_date)
+            .map_err(|e| format!("写入任职时间失败: {}", e))?;
+        worksheet.write(&format!("P{}", current_row), current_level_date)
+            .map_err(|e| format!("写入任现职级时间失败: {}", e))?;
+        worksheet.write(&format!("Q{}", current_row), id_number)
+            .map_err(|e| format!("写入身份证号失败: {}", e))?;
+        worksheet.write(&format!("R{}", current_row), phone)
+            .map_err(|e| format!("写入联系电话失败: {}", e))?;
+        worksheet.write(&format!("S{}", current_row), remarks)
+            .map_err(|e| format!("写入备注失败: {}", e))?;
+        
+        current_row += 1;
+    }
+    
+    // 保存文件
+    workbook.save()
+        .map_err(|e| format!("保存Excel文件失败: {}", e))?;
     
     Ok(())
 }
