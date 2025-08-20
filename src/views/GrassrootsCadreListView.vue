@@ -692,6 +692,17 @@ const exportFields = [
   { key: "political_status", label: "政治面貌" },
   { key: "party_entry_date", label: "入党时间" },
   { key: "phone", label: "联系电话" },
+  { key: "grassroots_vice_position_date", label: "任基层副职时间" },
+  { key: "grassroots_vice_tenure", label: "任基层副职年限" },
+  { key: "grassroots_chief_position_date", label: "任基层正职时间" },
+  { key: "grassroots_chief_tenure", label: "任基层正职年限" },
+  { key: "midlevel_assistant_date", label: "任中层助理时间" },
+  { key: "midlevel_assistant_tenure", label: "任中层助理年限" },
+  { key: "midlevel_vice_date", label: "任中层副职时间" },
+  { key: "midlevel_vice_tenure", label: "任中层副职年限" },
+  { key: "midlevel_chief_date", label: "任中层正职时间" },
+  { key: "midlevel_chief_tenure", label: "任中层正职年限" },
+  { key: "same_department_tenure", label: "同部门任职年限" },
   { key: "remarks", label: "备注" }
 ];
 
@@ -726,6 +737,17 @@ const currentCadre = ref({
   political_status: "",
   party_entry_date: "",
   phone: "",
+  grassroots_vice_position_date: "",
+  grassroots_vice_tenure: null,
+  grassroots_chief_position_date: "",
+  grassroots_chief_tenure: null,
+  midlevel_assistant_date: "",
+  midlevel_assistant_tenure: null,
+  midlevel_vice_date: "",
+  midlevel_vice_tenure: null,
+  midlevel_chief_date: "",
+  midlevel_chief_tenure: null,
+  same_department_tenure: null,
   remarks: "",
   major: "",
   contact_date: "",
@@ -1279,6 +1301,17 @@ function resetForm() {
     political_status: "",
     party_entry_date: "",
     phone: "",
+    grassroots_vice_position_date: "",
+    grassroots_vice_tenure: null,
+    grassroots_chief_position_date: "",
+    grassroots_chief_tenure: null,
+    midlevel_assistant_date: "",
+    midlevel_assistant_tenure: null,
+    midlevel_vice_date: "",
+    midlevel_vice_tenure: null,
+    midlevel_chief_date: "",
+    midlevel_chief_tenure: null,
+    same_department_tenure: null,
     remarks: "",
     major: "",
     contact_date: "",
@@ -1349,12 +1382,15 @@ async function performImport() {
       return;
     }
     
+    console.log("开始导入文件:", selected);
+    
     // 调用后端导入功能
     const result = await invoke("import_cadre_info_from_excel", { 
       filePath: selected,
       isMidlevel: false
     });
     
+    console.log("导入结果:", result);
     alert(result);
     
     // 关闭导入对话框
@@ -1363,6 +1399,7 @@ async function performImport() {
     // 重新加载数据
     loadCadreInfo();
   } catch (error) {
+    console.error("导入失败:", error);
     alert("导入失败: " + error);
   } finally {
     importLoading.value = false;

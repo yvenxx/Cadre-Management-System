@@ -294,6 +294,112 @@
           </el-col>
         </el-row>
       </div>
+      
+      <!-- 任职信息 -->
+      <div class="form-section">
+        <h4 class="form-section-title">任职信息</h4>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="任基层副职时间">
+              <el-date-picker 
+                v-model="formData.grassroots_vice_position_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任基层副职年限">
+              <el-input-number v-model="formData.grassroots_vice_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任基层正职时间">
+              <el-date-picker 
+                v-model="formData.grassroots_chief_position_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="任基层正职年限">
+              <el-input-number v-model="formData.grassroots_chief_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任中层助理层级时间">
+              <el-date-picker 
+                v-model="formData.midlevel_assistant_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任中层助理年限">
+              <el-input-number v-model="formData.midlevel_assistant_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="任中层副职时间">
+              <el-date-picker 
+                v-model="formData.midlevel_vice_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任中层副职年限">
+              <el-input-number v-model="formData.midlevel_vice_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任中层正职时间">
+              <el-date-picker 
+                v-model="formData.midlevel_chief_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="任中层正职年限">
+              <el-input-number v-model="formData.midlevel_chief_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="同部门任职年限">
+              <el-input-number v-model="formData.same_department_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </div>
     </el-form>
     
     <template #footer>
@@ -348,6 +454,17 @@ const props = defineProps({
       political_status: "",
       party_entry_date: "",
       phone: "",
+      grassroots_vice_position_date: "",
+      grassroots_vice_tenure: null,
+      grassroots_chief_position_date: "",
+      grassroots_chief_tenure: null,
+      midlevel_assistant_date: "",
+      midlevel_assistant_tenure: null,
+      midlevel_vice_date: "",
+      midlevel_vice_tenure: null,
+      midlevel_chief_date: "",
+      midlevel_chief_tenure: null,
+      same_department_tenure: null,
       remarks: "",
       major: "",
       contact_date: "",
@@ -497,7 +614,12 @@ watch(() => props.cadre, (newCadre) => {
     'position_entry_date',
     'probation_end_reminder',
     'birth_date',
-    'party_entry_date'
+    'party_entry_date',
+    'grassroots_vice_position_date',
+    'grassroots_chief_position_date',
+    'midlevel_assistant_date',
+    'midlevel_vice_date',
+    'midlevel_chief_date'
   ];
   
   dateFields.forEach(field => {
@@ -552,7 +674,12 @@ async function handleSubmit() {
       'position_entry_date',
       'probation_end_reminder',
       'birth_date',
-      'party_entry_date'
+      'party_entry_date',
+      'grassroots_vice_position_date',
+      'grassroots_chief_position_date',
+      'midlevel_assistant_date',
+      'midlevel_vice_date',
+      'midlevel_chief_date'
     ];
     
     dateFields.forEach(field => {

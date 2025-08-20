@@ -21,6 +21,14 @@
           <i class="menu-icon">📊</i>
           <span>信息结构统计</span>
         </el-menu-item>
+        <el-menu-item index="grassroots-tenure">
+          <i class="menu-icon">📅</i>
+          <span>基层任职年限表</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-tenure">
+          <i class="menu-icon">📅</i>
+          <span>中层任职年限表</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -29,6 +37,8 @@
         <GrassrootsCadreListView v-if="activeMenu === 'grassroots-cadre-list'" />
         <MidLevelCadreListView v-else-if="activeMenu === 'midlevel-cadre-list'" />
         <StatisticsView v-else-if="activeMenu === 'statistics'" />
+        <GrassrootsTenureView v-else-if="activeMenu === 'grassroots-tenure'" />
+        <MidlevelTenureView v-else-if="activeMenu === 'midlevel-tenure'" />
       </el-main>
       <el-footer class="app-footer-container">
         <Footer />
@@ -42,6 +52,8 @@ import { ref } from 'vue'
 import GrassrootsCadreListView from '../views/GrassrootsCadreListView.vue'
 import MidLevelCadreListView from '../views/MidLevelCadreListView.vue'
 import StatisticsView from '../views/StatisticsView.vue'
+import GrassrootsTenureView from '../views/GrassrootsTenureView.vue'
+import MidlevelTenureView from '../views/MidlevelTenureView.vue'
 import Footer from './Footer.vue'
 
 const activeMenu = ref('grassroots-cadre-list')
