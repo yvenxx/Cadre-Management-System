@@ -41,4 +41,19 @@ html, body {
   --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   --hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
+
+/* 修改Element Plus表格的横向滚动条大小 */
+.el-scrollbar__bar.is-horizontal {
+  height: 16px !important;
+}
+
+.el-scrollbar__bar.is-horizontal .el-scrollbar__thumb {
+  height: 16px !important;
+  border-radius: 8px !important;
+  background-color: #c1c1c1 !important;
+}
+
+.el-scrollbar__bar.is-horizontal .el-scrollbar__thumb:hover {
+  background-color: #a8a8a8 !important;
+}
 </style>

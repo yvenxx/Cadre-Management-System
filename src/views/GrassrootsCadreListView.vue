@@ -3,7 +3,7 @@
     <el-card class="content-section">
       <template #header>
         <div class="section-header">
-          <h2>管理人员信息表</h2>
+          <h2>基层管理人员信息表</h2>
         </div>
       </template>
 
@@ -237,6 +237,16 @@
 
           <el-row :gutter="16">
             <el-col :span="8">
+              <el-form-item label="试用期（年）">
+                <el-input-number
+                  v-model="filters.probationPeriod"
+                  placeholder="请输入试用期"
+                  style="width: 100%"
+                  controls-position="right"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="出生日期范围">
                 <el-date-picker
                   v-model="filterDateRanges.birthDate"
@@ -266,6 +276,9 @@
                 />
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
             <el-col :span="8">
               <el-form-item label="任现职级时间范围">
                 <el-date-picker
@@ -281,9 +294,6 @@
                 />
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row :gutter="16">
             <el-col :span="8">
               <el-form-item label="任职时间范围">
                 <el-date-picker
@@ -314,6 +324,9 @@
                 />
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
             <el-col :span="8">
               <el-form-item label="试用期满到期提醒范围">
                 <el-date-picker
@@ -329,9 +342,6 @@
                 />
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row :gutter="16">
             <el-col :span="8">
               <el-form-item label="全日制毕业院校系及专业">
                 <el-input v-model="filters.fullTimeSchoolMajor" placeholder="请输入全日制毕业院校系及专业" clearable />
@@ -340,16 +350,6 @@
             <el-col :span="8">
               <el-form-item label="在职毕业院校系及专业">
                 <el-input v-model="filters.partTimeSchoolPhone" placeholder="请输入在职毕业院校系及专业" clearable />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="试用期（年）">
-                <el-input-number
-                  v-model="filters.probationPeriod"
-                  placeholder="请输入试用期"
-                  style="width: 100%"
-                  controls-position="right"
-                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -377,13 +377,50 @@
           </span>
         </div>
         <div class="export-buttons-group">
-          <el-button type="primary" @click="openAddModal" :icon="Plus">新增</el-button>
-          <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0">导出选中</el-button>
-          <el-button type="warning" @click="exportAllCadres" :icon="Download">导出全部</el-button>
-          <el-button type="info" @click="downloadImportTemplate" :icon="Download">下载模板</el-button>
-          <el-button type="info" @click="openImportDialog" :icon="Upload">导入数据</el-button>
+          <el-button type="primary" @click="openAddModal" :icon="Plus" size="small">新增</el-button>
+          <el-button type="success" @click="exportSelectedCadres" :icon="Upload" :disabled="selectedCadres.length === 0" size="small">导出选中</el-button>
+          <el-button type="warning" @click="exportAllCadres" :icon="Download" size="small">导出全部</el-button>
+          <el-button type="info" @click="exportCadreRoster" :icon="Download" size="small">导出干部名册</el-button>
+          <el-button type="info" @click="downloadImportTemplate" :icon="Download" size="small">下载模板</el-button>
+          <el-button type="info" @click="openImportDialog" :icon="Upload" size="small">导入数据</el-button>
+          <el-button type="danger" @click="confirmDeleteAll" :icon="Delete" size="small">全部删除</el-button>
         </div>
       </div>
+
+      <!-- 删除确认对话框 -->
+      <el-dialog
+        v-model="showDeleteConfirmDialog"
+        title="确认删除"
+        width="30%"
+        center
+      >
+        <div style="text-align: center; padding: 20px;">
+          <el-alert
+            title="警告：此操作将删除所有数据，且不可恢复！"
+            type="error"
+            :closable="false"
+            show-icon
+          />
+          <p style="margin: 20px 0; font-size: 16px;">请输入"<strong style="color: red;">确认删除</strong>"以继续：</p>
+          <el-input 
+            v-model="deleteConfirmText" 
+            placeholder="请输入确认删除" 
+            style="margin-bottom: 20px;"
+          />
+        </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="showDeleteConfirmDialog = false">取消</el-button>
+            <el-button 
+              type="danger" 
+              @click="deleteAllCadres" 
+              :disabled="deleteConfirmText !== '确认删除'"
+            >
+              确认删除
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
 
       <!-- 数据表格 -->
       <el-table 
@@ -391,6 +428,7 @@
         style="width: 100%" 
         row-key="id"
         @selection-change="handleSelectionChange"
+        max-height="600"
       >
         <el-table-column type="selection" width="55" fixed />
         <el-table-column type="index" label="序号" width="60" fixed />
@@ -466,6 +504,7 @@
       v-model="showModal"
       :cadre="currentCadre"
       @save="saveCadreInfo"
+      :is-midlevel="false"
     />
     
     <!-- 导出配置弹窗 -->
@@ -480,7 +519,7 @@
     <!-- 导入数据弹窗 -->
     <el-dialog
       v-model="showImportModal"
-      title="导入干部信息"
+      title="导入基层干部信息"
       width="500px"
       @close="handleImportClose"
     >
@@ -514,7 +553,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from '@tauri-apps/plugin-dialog';
 import { ElMessageBox } from 'element-plus';
-import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
+import { Search, RefreshRight, OfficeBuilding, UserFilled, Medal, Plus, Upload, Download, ArrowUp, ArrowDown, Delete } from '@element-plus/icons-vue';
 import CadreForm from '../components/CadreForm.vue';
 import ExportConfig from '../components/ExportConfig.vue';
 
@@ -545,7 +584,7 @@ function formatDate(date) {
 const showModal = ref(false);
 const showExportModal = ref(false);
 const showImportModal = ref(false); // 导入弹窗显示状态
-const exportDefaultFileName = ref("干部信息");
+const exportDefaultFileName = ref("基层干部信息");
 const exportFilteredData = ref(false); // 标识是否导出筛选后的数据
 const selectedCadres = ref([]); // 用于存储选中的干部
 
@@ -689,6 +728,17 @@ const exportFields = [
   { key: "political_status", label: "政治面貌" },
   { key: "party_entry_date", label: "入党时间" },
   { key: "phone", label: "联系电话" },
+  { key: "grassroots_vice_position_date", label: "任基层副职时间" },
+  { key: "grassroots_vice_tenure", label: "任基层副职年限" },
+  { key: "grassroots_chief_position_date", label: "任基层正职时间" },
+  { key: "grassroots_chief_tenure", label: "任基层正职年限" },
+  { key: "midlevel_assistant_date", label: "任中层助理时间" },
+  { key: "midlevel_assistant_tenure", label: "任中层助理年限" },
+  { key: "midlevel_vice_date", label: "任中层副职时间" },
+  { key: "midlevel_vice_tenure", label: "任中层副职年限" },
+  { key: "midlevel_chief_date", label: "任中层正职时间" },
+  { key: "midlevel_chief_tenure", label: "任中层正职年限" },
+  { key: "same_department_tenure", label: "同部门任职年限" },
   { key: "remarks", label: "备注" }
 ];
 
@@ -723,6 +773,17 @@ const currentCadre = ref({
   political_status: "",
   party_entry_date: "",
   phone: "",
+  grassroots_vice_position_date: "",
+  grassroots_vice_tenure: null,
+  grassroots_chief_position_date: "",
+  grassroots_chief_tenure: null,
+  midlevel_assistant_date: "",
+  midlevel_assistant_tenure: null,
+  midlevel_vice_date: "",
+  midlevel_vice_tenure: null,
+  midlevel_chief_date: "",
+  midlevel_chief_tenure: null,
+  same_department_tenure: null,
   remarks: "",
   major: "",
   contact_date: "",
@@ -765,6 +826,263 @@ const filters = ref({
   remarks: ""
 });
 
+// 删除确认相关数据
+const showDeleteConfirmDialog = ref(false);
+const deleteConfirmText = ref("");
+
+// 构建筛选参数
+function buildFilterParams() {
+  const filterParams = {
+    filters: [],
+    date_ranges: [],
+    age_min: null,
+    age_max: null
+  };
+  
+  // 添加普通筛选条件
+  if (filters.value.name) {
+    filterParams.filters.push({
+      field: "name",
+      operator: "like",
+      value: filters.value.name
+    });
+  }
+  
+  if (filters.value.gender) {
+    filterParams.filters.push({
+      field: "gender",
+      operator: "eq",
+      value: filters.value.gender
+    });
+  }
+  
+  if (filters.value.department) {
+    filterParams.filters.push({
+      field: "department",
+      operator: "eq",
+      value: filters.value.department
+    });
+  }
+  
+  if (filters.value.section) {
+    filterParams.filters.push({
+      field: "section",
+      operator: "eq",
+      value: filters.value.section
+    });
+  }
+  
+  if (filters.value.position1) {
+    filterParams.filters.push({
+      field: "position1",
+      operator: "eq",
+      value: filters.value.position1
+    });
+  }
+  
+  if (filters.value.position2) {
+    filterParams.filters.push({
+      field: "position2",
+      operator: "eq",
+      value: filters.value.position2
+    });
+  }
+  
+  if (filters.value.education) {
+    filterParams.filters.push({
+      field: "education",
+      operator: "eq",
+      value: filters.value.education
+    });
+  }
+  
+  if (filters.value.politicalStatus) {
+    filterParams.filters.push({
+      field: "political_status",
+      operator: "eq",
+      value: filters.value.politicalStatus
+    });
+  }
+  
+  if (filters.value.idNumber) {
+    filterParams.filters.push({
+      field: "id_number",
+      operator: "like",
+      value: filters.value.idNumber
+    });
+  }
+  
+  if (filters.value.nativePlace) {
+    filterParams.filters.push({
+      field: "native_place",
+      operator: "eq",
+      value: filters.value.nativePlace
+    });
+  }
+  
+  if (filters.value.ethnicity) {
+    filterParams.filters.push({
+      field: "ethnicity",
+      operator: "eq",
+      value: filters.value.ethnicity
+    });
+  }
+  
+  if (filters.value.technicalPosition) {
+    filterParams.filters.push({
+      field: "technical_position",
+      operator: "eq",
+      value: filters.value.technicalPosition
+    });
+  }
+  
+  if (filters.value.phone) {
+    filterParams.filters.push({
+      field: "phone",
+      operator: "like",
+      value: filters.value.phone
+    });
+  }
+  
+  if (filters.value.birthPlace) {
+    filterParams.filters.push({
+      field: "birth_place",
+      operator: "like",
+      value: filters.value.birthPlace
+    });
+  }
+  
+  if (filters.value.fullTimeEducation) {
+    filterParams.filters.push({
+      field: "full_time_education",
+      operator: "like",
+      value: filters.value.fullTimeEducation
+    });
+  }
+  
+  if (filters.value.partTimeEducation) {
+    filterParams.filters.push({
+      field: "part_time_education",
+      operator: "like",
+      value: filters.value.partTimeEducation
+    });
+  }
+  
+  if (filters.value.probationPeriod) {
+    filterParams.filters.push({
+      field: "probation_period",
+      operator: "eq",
+      value: filters.value.probationPeriod
+    });
+  }
+  
+  if (filters.value.fullTimeSchoolMajor) {
+    filterParams.filters.push({
+      field: "full_time_school_major",
+      operator: "like",
+      value: filters.value.fullTimeSchoolMajor
+    });
+  }
+  
+  if (filters.value.partTimeSchoolPhone) {
+    filterParams.filters.push({
+      field: "part_time_school_phone",
+      operator: "like",
+      value: filters.value.partTimeSchoolPhone
+    });
+  }
+  
+  if (filters.value.remarks) {
+    filterParams.filters.push({
+      field: "remarks",
+      operator: "like",
+      value: filters.value.remarks
+    });
+  }
+  
+  // 添加日期范围筛选条件
+  if (filterDateRanges.value.companyEntryDate && filterDateRanges.value.companyEntryDate.length === 2) {
+    filterParams.date_ranges.push([
+      "company_entry_date",
+      {
+        start: filterDateRanges.value.companyEntryDate[0],
+        end: filterDateRanges.value.companyEntryDate[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.birthDate && filterDateRanges.value.birthDate.length === 2) {
+    filterParams.date_ranges.push([
+      "birth_date",
+      {
+        start: filterDateRanges.value.birthDate[0],
+        end: filterDateRanges.value.birthDate[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.workStart && filterDateRanges.value.workStart.length === 2) {
+    filterParams.date_ranges.push([
+      "work_start_date",
+      {
+        start: filterDateRanges.value.workStart[0],
+        end: filterDateRanges.value.workStart[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.currentLevel && filterDateRanges.value.currentLevel.length === 2) {
+    filterParams.date_ranges.push([
+      "current_level_date",
+      {
+        start: filterDateRanges.value.currentLevel[0],
+        end: filterDateRanges.value.currentLevel[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.positionEntry && filterDateRanges.value.positionEntry.length === 2) {
+    filterParams.date_ranges.push([
+      "position_entry_date",
+      {
+        start: filterDateRanges.value.positionEntry[0],
+        end: filterDateRanges.value.positionEntry[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.partyEntry && filterDateRanges.value.partyEntry.length === 2) {
+    filterParams.date_ranges.push([
+      "party_entry_date",
+      {
+        start: filterDateRanges.value.partyEntry[0],
+        end: filterDateRanges.value.partyEntry[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.probationEndReminder && filterDateRanges.value.probationEndReminder.length === 2) {
+    filterParams.date_ranges.push([
+      "probation_end_reminder",
+      {
+        start: filterDateRanges.value.probationEndReminder[0],
+        end: filterDateRanges.value.probationEndReminder[1]
+      }
+    ]);
+  }
+  
+  // 添加年龄范围筛选
+  if (filters.value.ageMin !== null && filters.value.ageMin !== undefined && filters.value.ageMin !== "") {
+    filterParams.age_min = parseInt(filters.value.ageMin);
+  }
+  
+  if (filters.value.ageMax !== null && filters.value.ageMax !== undefined && filters.value.ageMax !== "") {
+    filterParams.age_max = parseInt(filters.value.ageMax);
+  }
+  
+  return filterParams;
+}
+
 // 计算筛选后的干部列表
 const filteredCadreList = computed(() => {
   return cadreList.value.filter(cadre => {
@@ -779,27 +1097,27 @@ const filteredCadreList = computed(() => {
     }
     
     // 部门筛选
-    if (filters.value.department && !cadre.department.includes(filters.value.department)) {
+    if (filters.value.department && cadre.department !== filters.value.department) {
       return false;
     }
     
     // 科室筛选
-    if (filters.value.section && !cadre.section.includes(filters.value.section)) {
+    if (filters.value.section && cadre.section !== filters.value.section) {
       return false;
     }
     
     // 职务1筛选
-    if (filters.value.position1 && !cadre.position1.includes(filters.value.position1)) {
+    if (filters.value.position1 && cadre.position1 !== filters.value.position1) {
       return false;
     }
     
     // 职务2筛选
-    if (filters.value.position2 && !cadre.position2.includes(filters.value.position2)) {
+    if (filters.value.position2 && cadre.position2 !== filters.value.position2) {
       return false;
     }
     
     // 学历筛选
-    if (filters.value.education && !cadre.education.includes(filters.value.education)) {
+    if (filters.value.education && cadre.education !== filters.value.education) {
       return false;
     }
     
@@ -814,17 +1132,17 @@ const filteredCadreList = computed(() => {
     }
     
     // 籍贯筛选
-    if (filters.value.nativePlace && !cadre.native_place.includes(filters.value.nativePlace)) {
+    if (filters.value.nativePlace && cadre.native_place !== filters.value.nativePlace) {
       return false;
     }
     
     // 民族筛选
-    if (filters.value.ethnicity && !cadre.ethnicity.includes(filters.value.ethnicity)) {
+    if (filters.value.ethnicity && cadre.ethnicity !== filters.value.ethnicity) {
       return false;
     }
     
     // 专业技术职务筛选
-    if (filters.value.technicalPosition && !cadre.technical_position.includes(filters.value.technicalPosition)) {
+    if (filters.value.technicalPosition && cadre.technical_position !== filters.value.technicalPosition) {
       return false;
     }
     
@@ -1036,10 +1354,10 @@ const filteredCadreList = computed(() => {
   });
 });
 
-// 加载所有干部信息
+// 加载所有基层干部信息
 async function loadCadreInfo() {
   try {
-    const data = await invoke("get_all_cadre_info");
+    const data = await invoke("get_all_grassroots_cadre_info");
     // 添加数据验证
     if (Array.isArray(data)) {
       cadreList.value = data;
@@ -1048,28 +1366,28 @@ async function loadCadreInfo() {
       cadreList.value = [];
     }
   } catch (error) {
-    console.error("加载干部信息失败:", error);
+    console.error("加载基层干部信息失败:", error);
     // 确保即使出错也不会导致界面崩溃
     cadreList.value = [];
   }
 }
 
-// 保存干部信息
+// 保存基层干部信息
 async function saveCadreInfo(cadreData) {
   try {
     if (cadreData.id) {
       // 更新现有记录
-      await invoke("update_cadre_info", { cadre: cadreData });
+      await invoke("update_grassroots_cadre_info", { cadre: cadreData });
     } else {
       // 添加新记录
-      await invoke("add_cadre_info", { cadre: cadreData });
+      await invoke("add_grassroots_cadre_info", { cadre: cadreData });
     }
     closeModal();
     loadCadreInfo();
   } catch (error) {
-    console.error("保存干部信息失败:", error);
+    console.error("保存基层干部信息失败:", error);
     // 使用更友好的错误提示
-    let errorMessage = "保存干部信息失败";
+    let errorMessage = "保存基层干部信息失败";
     if (error && typeof error === 'string') {
       errorMessage += ": " + error;
     } else if (error && error.message) {
@@ -1079,7 +1397,7 @@ async function saveCadreInfo(cadreData) {
   }
 }
 
-// 编辑干部信息
+// 编辑基层干部信息
 function editCadre(cadre) {
   // 创建深拷贝
   const cadreCopy = { ...cadre };
@@ -1199,7 +1517,7 @@ function editCadre(cadre) {
   showModal.value = true;
 }
 
-// 删除干部信息
+// 删除基层干部信息
 async function deleteCadre(id) {
   try {
     // 使用 Element Plus 的确认框
@@ -1214,14 +1532,14 @@ async function deleteCadre(id) {
     );
     
     // 用户点击确定后执行删除操作
-    await invoke("delete_cadre_info", { id });
+    await invoke("delete_grassroots_cadre_info", { id });
     loadCadreInfo();
   } catch (error) {
     // 用户点击取消或删除失败时的处理
     if (error !== 'cancel') {
-      console.error("删除干部信息失败:", error);
+      console.error("删除基层干部信息失败:", error);
       // 使用更友好的错误提示
-      let errorMessage = "删除干部信息失败";
+      let errorMessage = "删除基层干部信息失败";
       if (error && typeof error === 'string') {
         errorMessage += ": " + error;
       } else if (error && error.message) {
@@ -1276,6 +1594,17 @@ function resetForm() {
     political_status: "",
     party_entry_date: "",
     phone: "",
+    grassroots_vice_position_date: "",
+    grassroots_vice_tenure: null,
+    grassroots_chief_position_date: "",
+    grassroots_chief_tenure: null,
+    midlevel_assistant_date: "",
+    midlevel_assistant_tenure: null,
+    midlevel_vice_date: "",
+    midlevel_vice_tenure: null,
+    midlevel_chief_date: "",
+    midlevel_chief_tenure: null,
+    same_department_tenure: null,
     remarks: "",
     major: "",
     contact_date: "",
@@ -1303,7 +1632,7 @@ async function downloadImportTemplate() {
         name: 'Excel Files',
         extensions: ['xlsx']
       }],
-      defaultPath: "干部信息导入模板.xlsx"
+      defaultPath: "基层干部信息导入模板.xlsx"
     });
     
     // 如果用户取消了保存对话框，则不执行下载
@@ -1312,7 +1641,7 @@ async function downloadImportTemplate() {
     }
     
     // 调用后端直接保存模板到指定路径
-    await invoke("save_import_template", { filePath });
+    await invoke("save_import_template", { filePath, isMidlevel: false });
     
     alert("导入模板已保存到: " + filePath);
   } catch (error) {
@@ -1346,11 +1675,15 @@ async function performImport() {
       return;
     }
     
+    console.log("开始导入文件:", selected);
+    
     // 调用后端导入功能
     const result = await invoke("import_cadre_info_from_excel", { 
-      filePath: selected
+      filePath: selected,
+      isMidlevel: false
     });
     
+    console.log("导入结果:", result);
     alert(result);
     
     // 关闭导入对话框
@@ -1359,6 +1692,7 @@ async function performImport() {
     // 重新加载数据
     loadCadreInfo();
   } catch (error) {
+    console.error("导入失败:", error);
     alert("导入失败: " + error);
   } finally {
     importLoading.value = false;
@@ -1420,37 +1754,37 @@ function clearFilters() {
   };
 }
 
-// 导出选中干部信息
+// 导出选中基层干部信息
 async function exportSelectedCadres() {
   if (selectedCadres.value.length === 0) {
-    alert("请先选择要导出的干部信息");
+    alert("请先选择要导出的基层干部信息");
     return;
   }
   
   try {
     // 设置默认文件名
-    exportDefaultFileName.value = "选中干部信息";
+    exportDefaultFileName.value = "选中基层干部信息";
     // 重置导出筛选数据标识
     exportFilteredData.value = false;
     // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
-    console.error("导出选中干部信息失败:", error);
+    console.error("导出选中基层干部信息失败:", error);
     alert("导出失败: " + error);
   }
 }
 
-// 导出全部干部信息
+// 导出全部基层干部信息
 async function exportAllCadres() {
   try {
     // 设置默认文件名
-    exportDefaultFileName.value = "全部干部信息";
+    exportDefaultFileName.value = "全部基层干部信息";
     // 标识为导出筛选后的数据
     exportFilteredData.value = true;
     // 打开导出配置弹窗
     showExportModal.value = true;
   } catch (error) {
-    console.error("导出全部干部信息失败:", error);
+    console.error("导出全部基层干部信息失败:", error);
     alert("导出失败: " + error);
   }
 }
@@ -1499,401 +1833,115 @@ async function performExport(exportData) {
   }
 }
 
+// 导出干部名册
+async function exportCadreRoster() {
+  try {
+    // 弹出文件保存对话框，让用户选择保存位置
+    const filePath = await save({
+      filters: [{
+        name: 'Excel Files',
+        extensions: ['xlsx']
+      }],
+      defaultPath: "基层管理人员名册.xlsx"
+    });
+    
+    // 如果用户取消了保存对话框，则不执行导出
+    if (!filePath) {
+      return;
+    }
+    
+    // 构建筛选参数
+    const filterParams = buildFilterParams();
+    
+    // 生成基层管理人员名册
+    await invoke("export_grassroots_cadre_roster", { 
+      outputPath: filePath,
+      filterParams: filterParams
+    });
+    
+    alert("导出成功！文件已保存为: " + filePath);
+  } catch (error) {
+    console.error("导出干部名册失败:", error);
+    alert("导出失败: " + error);
+  }
+}
+
 // 获取字段的distinct值
 async function loadDistinctFieldValues() {
   try {
     // 获取部门的distinct值
-    distinctDepartments.value = await invoke("get_distinct_field_values", { fieldName: "department" });
+    distinctDepartments.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "department" });
     
     // 获取科室的distinct值
-    distinctSections.value = await invoke("get_distinct_field_values", { fieldName: "section" });
+    distinctSections.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "section" });
     
     // 获取职务1的distinct值
-    distinctPositions1.value = await invoke("get_distinct_field_values", { fieldName: "position1" });
+    distinctPositions1.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "position1" });
     
     // 获取职务2的distinct值
-    distinctPositions2.value = await invoke("get_distinct_field_values", { fieldName: "position2" });
+    distinctPositions2.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "position2" });
     
     // 获取学历的distinct值
-    distinctEducations.value = await invoke("get_distinct_field_values", { fieldName: "education" });
+    distinctEducations.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "education" });
     
     // 获取专业技术职务的distinct值
-    distinctTechnicalPositions.value = await invoke("get_distinct_field_values", { fieldName: "technical_position" });
+    distinctTechnicalPositions.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "technical_position" });
     
     // 获取籍贯的distinct值
-    distinctNativePlaces.value = await invoke("get_distinct_field_values", { fieldName: "native_place" });
+    distinctNativePlaces.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "native_place" });
     
     // 获取民族的distinct值
-    distinctEthnicities.value = await invoke("get_distinct_field_values", { fieldName: "ethnicity" });
+    distinctEthnicities.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "ethnicity" });
     
     // 获取出生地的distinct值
-    distinctBirthPlaces.value = await invoke("get_distinct_field_values", { fieldName: "birth_place" });
+    distinctBirthPlaces.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "birth_place" });
     
     // 获取全日制学历的distinct值
-    distinctFullTimeEducations.value = await invoke("get_distinct_field_values", { fieldName: "full_time_education" });
+    distinctFullTimeEducations.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "full_time_education" });
     
     // 获取在职学历的distinct值
-    distinctPartTimeEducations.value = await invoke("get_distinct_field_values", { fieldName: "part_time_education" });
+    distinctPartTimeEducations.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "part_time_education" });
     
     // 获取政治面貌的distinct值
-    distinctPoliticalStatuses.value = await invoke("get_distinct_field_values", { fieldName: "political_status" });
+    distinctPoliticalStatuses.value = await invoke("get_distinct_field_values_for_table", { tableName: "grassroots_cadres", fieldName: "political_status" });
   } catch (error) {
     console.error("获取字段distinct值失败:", error);
   }
 }
 
-// 获取部门统计信息（人数和百分比）
-function getDepartmentStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.department) {
-      stats[cadre.department] = (stats[cadre.department] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [department, count] of Object.entries(stats)) {
-    result[department] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
+// 确认删除所有数据
+function confirmDeleteAll() {
+  showDeleteConfirmDialog.value = true;
+  deleteConfirmText.value = "";
 }
 
-// 获取性别统计信息（人数和百分比）
-function getGenderStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.gender) {
-      stats[cadre.gender] = (stats[cadre.gender] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [gender, count] of Object.entries(stats)) {
-    result[gender] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
+// 删除所有干部数据
+async function deleteAllCadres() {
+  if (deleteConfirmText.value !== "确认删除") {
+    alert("请输入正确的确认文本！");
+    return;
   }
   
-  return result;
-}
-
-// 获取年龄分布统计信息（人数和百分比）
-function getAgeDistribution() {
-  const stats = {
-    "30岁以下": 0,
-    "30-40岁": 0,
-    "40-50岁": 0,
-    "50-60岁": 0,
-    "60岁以上": 0
-  };
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.age !== null && cadre.age !== undefined) {
-      const age = parseInt(cadre.age);
-      if (age < 30) {
-        stats["30岁以下"]++;
-      } else if (age < 40) {
-        stats["30-40岁"]++;
-      } else if (age < 50) {
-        stats["40-50岁"]++;
-      } else if (age < 60) {
-        stats["50-60岁"]++;
-      } else {
-        stats["60岁以上"]++;
-      }
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [range, count] of Object.entries(stats)) {
-    result[range] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取司龄分布统计信息（人数和百分比）
-function getCompanyTenureDistribution() {
-  const stats = {
-    "5年以下": 0,
-    "5-10年": 0,
-    "10-20年": 0,
-    "20-30年": 0,
-    "30年以上": 0
-  };
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.company_tenure !== null && cadre.company_tenure !== undefined) {
-      const tenure = parseFloat(cadre.company_tenure);
-      if (tenure < 5) {
-        stats["5年以下"]++;
-      } else if (tenure < 10) {
-        stats["5-10年"]++;
-      } else if (tenure < 20) {
-        stats["10-20年"]++;
-      } else if (tenure < 30) {
-        stats["20-30年"]++;
-      } else {
-        stats["30年以上"]++;
-      }
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [range, count] of Object.entries(stats)) {
-    result[range] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取职务分布统计信息（人数和百分比）
-function getPositionStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    // 统计职务1和职务2
-    if (cadre.position1) {
-      stats[cadre.position1] = (stats[cadre.position1] || 0) + 1;
-    }
-    if (cadre.position2) {
-      stats[cadre.position2] = (stats[cadre.position2] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [position, count] of Object.entries(stats)) {
-    result[position] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取最高学历分布统计信息（人数和百分比）
-function getEducationStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.education) {
-      stats[cadre.education] = (stats[cadre.education] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [education, count] of Object.entries(stats)) {
-    result[education] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取政治面貌分布统计信息（人数和百分比）
-function getPoliticalStatusStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.political_status) {
-      stats[cadre.political_status] = (stats[cadre.political_status] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [status, count] of Object.entries(stats)) {
-    result[status] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取全日制学历分布统计信息（人数和百分比）
-function getFullTimeEducationStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.full_time_education) {
-      stats[cadre.full_time_education] = (stats[cadre.full_time_education] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [education, count] of Object.entries(stats)) {
-    result[education] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 获取在职学历分布统计信息（人数和百分比）
-function getPartTimeEducationStats() {
-  const stats = {};
-  const total = filteredCadreList.value.length;
-  
-  filteredCadreList.value.forEach(cadre => {
-    if (cadre.part_time_education) {
-      stats[cadre.part_time_education] = (stats[cadre.part_time_education] || 0) + 1;
-    }
-  });
-  
-  // 添加百分比信息
-  const result = {};
-  for (const [education, count] of Object.entries(stats)) {
-    result[education] = {
-      count: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(2) : 0
-    };
-  }
-  
-  return result;
-}
-
-// 计算司龄
-function calculateCompanyTenure() {
-  if (currentCadre.value.company_entry_date) {
-    // 确保日期是Date对象
-    const entryDate = currentCadre.value.company_entry_date instanceof Date 
-      ? currentCadre.value.company_entry_date 
-      : new Date(currentCadre.value.company_entry_date);
+  try {
+    // 获取所有干部的ID
+    const allCadres = await invoke("get_all_grassroots_cadre_info");
     
-    if (isNaN(entryDate.getTime())) {
-      currentCadre.value.company_tenure = null;
-      return;
+    // 逐个删除所有干部
+    for (const cadre of allCadres) {
+      await invoke("delete_grassroots_cadre_info", { id: cadre.id });
     }
     
-    const today = new Date();
-    const diffTime = Math.abs(today - entryDate);
-    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
-    currentCadre.value.company_tenure = parseFloat(diffYears.toFixed(1));
-  } else {
-    currentCadre.value.company_tenure = null;
-  }
-}
-
-// 计算工龄
-function calculateWorkTenure() {
-  if (currentCadre.value.work_start_date) {
-    // 确保日期是Date对象
-    const startDate = currentCadre.value.work_start_date instanceof Date 
-      ? currentCadre.value.work_start_date 
-      : new Date(currentCadre.value.work_start_date);
+    // 关闭确认对话框
+    showDeleteConfirmDialog.value = false;
+    deleteConfirmText.value = "";
     
-    if (isNaN(startDate.getTime())) {
-      currentCadre.value.work_tenure = null;
-      return;
-    }
+    // 重新加载数据
+    await loadCadreInfo();
     
-    const today = new Date();
-    const diffTime = Math.abs(today - startDate);
-    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
-    currentCadre.value.work_tenure = parseFloat(diffYears.toFixed(1));
-  } else {
-    currentCadre.value.work_tenure = null;
-  }
-}
-
-// 计算试用期满到期提醒
-function calculateProbationEnd() {
-  // 只有当试用期和任职时间都存在时才计算
-  if (currentCadre.value.probation_period && currentCadre.value.position_entry_date) {
-    // 确保日期是Date对象
-    const positionDate = currentCadre.value.position_entry_date instanceof Date 
-      ? currentCadre.value.position_entry_date 
-      : new Date(currentCadre.value.position_entry_date);
-    
-    if (isNaN(positionDate.getTime())) {
-      currentCadre.value.probation_end_reminder = "";
-      return;
-    }
-    
-    const probationYears = parseFloat(currentCadre.value.probation_period);
-    
-    // 计算试用期结束日期
-    const endDate = new Date(positionDate);
-    endDate.setFullYear(endDate.getFullYear() + Math.floor(probationYears));
-    endDate.setMonth(endDate.getMonth() + Math.round((probationYears % 1) * 12));
-    
-    // 直接设置日期对象
-    currentCadre.value.probation_end_reminder = endDate;
-  } else {
-    currentCadre.value.probation_end_reminder = "";
-  }
-}
-
-// 从身份证号提取出生日期和年龄
-function extractIdInfo() {
-  const idNumber = currentCadre.value.id_number;
-  if (idNumber && idNumber.length === 18) {
-    // 提取出生日期 (第7-14位)
-    const birthYear = idNumber.substring(6, 10);
-    const birthMonth = idNumber.substring(10, 12);
-    const birthDay = idNumber.substring(12, 14);
-    
-    // 创建日期对象
-    const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
-    
-    // 检查日期是否有效
-    if (!isNaN(birthDate.getTime())) {
-      // 设置日期对象
-      currentCadre.value.birth_date = birthDate;
-      
-      // 计算年龄
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      // 如果还没过生日，则年龄减1
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      
-      currentCadre.value.age = age;
-    } else {
-      currentCadre.value.birth_date = "";
-      currentCadre.value.age = null;
-    }
-  } else {
-    currentCadre.value.birth_date = "";
-    currentCadre.value.age = null;
+    alert("所有数据已成功删除！");
+  } catch (error) {
+    console.error("删除所有数据失败:", error);
+    alert("删除失败: " + error);
   }
 }
 
@@ -1914,9 +1962,8 @@ onMounted(() => {
   border-radius: 16px;
   box-shadow: var(--card-shadow);
   position: relative;
-  overflow: auto;
+  overflow: visible;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  max-height: calc(100vh - 50px);
 }
 
 .content-section::before {
@@ -1981,10 +2028,10 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 20px;
+  padding: 15px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   color: white;
 }
 
@@ -1993,18 +2040,23 @@ onMounted(() => {
 }
 
 .export-count-info {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: white;
   background: rgba(255, 255, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 15px;
   backdrop-filter: blur(10px);
 }
 
 .export-buttons-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+}
+
+.export-buttons-group .el-button {
+  font-size: 12px;
+  padding: 8px 12px;
 }
 
 .file-info {

@@ -9,33 +9,60 @@
         class="menu"
         @select="handleMenuSelect"
       >
-        <el-menu-item index="cadre-list">
+        <el-menu-item index="grassroots-cadre-list">
           <i class="menu-icon">📋</i>
-          <span>管理人员信息表</span>
+          <span>基层管理人员信息表</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-cadre-list">
+          <i class="menu-icon">📋</i>
+          <span>中层管理人员信息表</span>
         </el-menu-item>
         <el-menu-item index="statistics">
           <i class="menu-icon">📊</i>
-          <span>信息结构统计</span>
+          <span>基层信息结构统计</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-statistics">
+          <i class="menu-icon">📊</i>
+          <span>中层信息结构统计</span>
+        </el-menu-item>
+        <el-menu-item index="grassroots-tenure">
+          <i class="menu-icon">📅</i>
+          <span>基层任职年限表</span>
+        </el-menu-item>
+        <el-menu-item index="midlevel-tenure">
+          <i class="menu-icon">📅</i>
+          <span>中层任职年限表</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
 
     <el-container>
       <el-main class="main-content">
-        <CadreListView v-if="activeMenu === 'cadre-list'" />
+        <GrassrootsCadreListView v-if="activeMenu === 'grassroots-cadre-list'" />
+        <MidLevelCadreListView v-else-if="activeMenu === 'midlevel-cadre-list'" />
         <StatisticsView v-else-if="activeMenu === 'statistics'" />
+        <MidlevelStatisticsView v-else-if="activeMenu === 'midlevel-statistics'" />
+        <GrassrootsTenureView v-else-if="activeMenu === 'grassroots-tenure'" />
+        <MidlevelTenureView v-else-if="activeMenu === 'midlevel-tenure'" />
       </el-main>
+      <el-footer class="app-footer-container">
+        <Footer />
+      </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import CadreListView from '../views/CadreListView.vue'
+import GrassrootsCadreListView from '../views/GrassrootsCadreListView.vue'
+import MidLevelCadreListView from '../views/MidLevelCadreListView.vue'
 import StatisticsView from '../views/StatisticsView.vue'
+import MidlevelStatisticsView from '../views/MidlevelStatisticsView.vue'
+import GrassrootsTenureView from '../views/GrassrootsTenureView.vue'
+import MidlevelTenureView from '../views/MidlevelTenureView.vue'
 import Footer from './Footer.vue'
 
-const activeMenu = ref('cadre-list')
+const activeMenu = ref('grassroots-cadre-list')
 
 const handleMenuSelect = (index) => {
   activeMenu.value = index
@@ -81,7 +108,15 @@ const handleMenuSelect = (index) => {
 .main-content {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
   padding: 25px;
-  height: calc(100vh - 50px);
+  height: calc(100vh - 100px);
   overflow-y: auto;
+}
+
+.app-footer-container {
+  background-color: #ffffff;
+  padding: 10px 0;
+  text-align: center;
+  height: 50px;
+  border-top: 1px solid #e9ecef;
 }
 </style>
