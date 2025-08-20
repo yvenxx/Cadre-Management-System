@@ -1,7 +1,9 @@
 mod database;
 mod export;
+mod filter;
 
 use database::{Database, GrassrootsCadreInfo, MidLevelCadreInfo};
+use filter::FilterParams;
 use export::{ExportConfig, export_to_excel};
 use tauri::State;
 use std::sync::Mutex;
@@ -1299,13 +1301,19 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
 // 使用模板导出基层管理人员名册
 #[tauri::command]
-fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String) -> Result<(), String> {
+fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String, filter_params: Option<FilterParams>) -> Result<(), String> {
     use std::fs;
     use edit_xlsx::Write;
     
     // 获取数据库连接
     let db_guard = db.lock().map_err(|e| format!("获取数据库锁失败: {}", e))?;
-    let cadres = db_guard.get_all_grassroots_cadres().map_err(|e| format!("获取基层干部信息失败: {}", e))?;
+    
+    // 根据是否有筛选条件获取数据
+    let cadres = if let Some(params) = filter_params {
+        db_guard.get_filtered_grassroots_cadres(&params).map_err(|e| format!("获取筛选后的基层干部信息失败: {}", e))?
+    } else {
+        db_guard.get_all_grassroots_cadres().map_err(|e| format!("获取基层干部信息失败: {}", e))?
+    };
     
     // 获取当前可执行文件的目录
     let exe_dir = std::env::current_exe()
@@ -1426,13 +1434,19 @@ fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: S
 
 // 使用模板导出中层管理人员名册
 #[tauri::command]
-fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String) -> Result<(), String> {
+fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: String, filter_params: Option<FilterParams>) -> Result<(), String> {
     use std::fs;
     use edit_xlsx::Write;
     
     // 获取数据库连接
     let db_guard = db.lock().map_err(|e| format!("获取数据库锁失败: {}", e))?;
-    let cadres = db_guard.get_all_midlevel_cadres().map_err(|e| format!("获取中层干部信息失败: {}", e))?;
+    
+    // 根据是否有筛选条件获取数据
+    let cadres = if let Some(params) = filter_params {
+        db_guard.get_filtered_midlevel_cadres(&params).map_err(|e| format!("获取筛选后的中层干部信息失败: {}", e))?
+    } else {
+        db_guard.get_all_midlevel_cadres().map_err(|e| format!("获取中层干部信息失败: {}", e))?
+    };
     
     // 获取当前可执行文件的目录
     let exe_dir = std::env::current_exe()

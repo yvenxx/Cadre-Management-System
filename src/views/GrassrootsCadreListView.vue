@@ -790,6 +790,259 @@ const filters = ref({
   remarks: ""
 });
 
+// 构建筛选参数
+function buildFilterParams() {
+  const filterParams = {
+    filters: [],
+    date_ranges: [],
+    age_min: null,
+    age_max: null
+  };
+  
+  // 添加普通筛选条件
+  if (filters.value.name) {
+    filterParams.filters.push({
+      field: "name",
+      operator: "like",
+      value: filters.value.name
+    });
+  }
+  
+  if (filters.value.gender) {
+    filterParams.filters.push({
+      field: "gender",
+      operator: "eq",
+      value: filters.value.gender
+    });
+  }
+  
+  if (filters.value.department) {
+    filterParams.filters.push({
+      field: "department",
+      operator: "eq",
+      value: filters.value.department
+    });
+  }
+  
+  if (filters.value.section) {
+    filterParams.filters.push({
+      field: "section",
+      operator: "eq",
+      value: filters.value.section
+    });
+  }
+  
+  if (filters.value.position1) {
+    filterParams.filters.push({
+      field: "position1",
+      operator: "eq",
+      value: filters.value.position1
+    });
+  }
+  
+  if (filters.value.position2) {
+    filterParams.filters.push({
+      field: "position2",
+      operator: "eq",
+      value: filters.value.position2
+    });
+  }
+  
+  if (filters.value.education) {
+    filterParams.filters.push({
+      field: "education",
+      operator: "eq",
+      value: filters.value.education
+    });
+  }
+  
+  if (filters.value.politicalStatus) {
+    filterParams.filters.push({
+      field: "political_status",
+      operator: "eq",
+      value: filters.value.politicalStatus
+    });
+  }
+  
+  if (filters.value.idNumber) {
+    filterParams.filters.push({
+      field: "id_number",
+      operator: "like",
+      value: filters.value.idNumber
+    });
+  }
+  
+  if (filters.value.nativePlace) {
+    filterParams.filters.push({
+      field: "native_place",
+      operator: "eq",
+      value: filters.value.nativePlace
+    });
+  }
+  
+  if (filters.value.ethnicity) {
+    filterParams.filters.push({
+      field: "ethnicity",
+      operator: "eq",
+      value: filters.value.ethnicity
+    });
+  }
+  
+  if (filters.value.technicalPosition) {
+    filterParams.filters.push({
+      field: "technical_position",
+      operator: "eq",
+      value: filters.value.technicalPosition
+    });
+  }
+  
+  if (filters.value.phone) {
+    filterParams.filters.push({
+      field: "phone",
+      operator: "like",
+      value: filters.value.phone
+    });
+  }
+  
+  if (filters.value.birthPlace) {
+    filterParams.filters.push({
+      field: "birth_place",
+      operator: "like",
+      value: filters.value.birthPlace
+    });
+  }
+  
+  if (filters.value.fullTimeEducation) {
+    filterParams.filters.push({
+      field: "full_time_education",
+      operator: "like",
+      value: filters.value.fullTimeEducation
+    });
+  }
+  
+  if (filters.value.partTimeEducation) {
+    filterParams.filters.push({
+      field: "part_time_education",
+      operator: "like",
+      value: filters.value.partTimeEducation
+    });
+  }
+  
+  if (filters.value.probationPeriod) {
+    filterParams.filters.push({
+      field: "probation_period",
+      operator: "eq",
+      value: filters.value.probationPeriod
+    });
+  }
+  
+  if (filters.value.fullTimeSchoolMajor) {
+    filterParams.filters.push({
+      field: "full_time_school_major",
+      operator: "like",
+      value: filters.value.fullTimeSchoolMajor
+    });
+  }
+  
+  if (filters.value.partTimeSchoolPhone) {
+    filterParams.filters.push({
+      field: "part_time_school_phone",
+      operator: "like",
+      value: filters.value.partTimeSchoolPhone
+    });
+  }
+  
+  if (filters.value.remarks) {
+    filterParams.filters.push({
+      field: "remarks",
+      operator: "like",
+      value: filters.value.remarks
+    });
+  }
+  
+  // 添加日期范围筛选条件
+  if (filterDateRanges.value.companyEntryDate && filterDateRanges.value.companyEntryDate.length === 2) {
+    filterParams.date_ranges.push([
+      "company_entry_date",
+      {
+        start: filterDateRanges.value.companyEntryDate[0],
+        end: filterDateRanges.value.companyEntryDate[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.birthDate && filterDateRanges.value.birthDate.length === 2) {
+    filterParams.date_ranges.push([
+      "birth_date",
+      {
+        start: filterDateRanges.value.birthDate[0],
+        end: filterDateRanges.value.birthDate[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.workStart && filterDateRanges.value.workStart.length === 2) {
+    filterParams.date_ranges.push([
+      "work_start_date",
+      {
+        start: filterDateRanges.value.workStart[0],
+        end: filterDateRanges.value.workStart[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.currentLevel && filterDateRanges.value.currentLevel.length === 2) {
+    filterParams.date_ranges.push([
+      "current_level_date",
+      {
+        start: filterDateRanges.value.currentLevel[0],
+        end: filterDateRanges.value.currentLevel[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.positionEntry && filterDateRanges.value.positionEntry.length === 2) {
+    filterParams.date_ranges.push([
+      "position_entry_date",
+      {
+        start: filterDateRanges.value.positionEntry[0],
+        end: filterDateRanges.value.positionEntry[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.partyEntry && filterDateRanges.value.partyEntry.length === 2) {
+    filterParams.date_ranges.push([
+      "party_entry_date",
+      {
+        start: filterDateRanges.value.partyEntry[0],
+        end: filterDateRanges.value.partyEntry[1]
+      }
+    ]);
+  }
+  
+  if (filterDateRanges.value.probationEndReminder && filterDateRanges.value.probationEndReminder.length === 2) {
+    filterParams.date_ranges.push([
+      "probation_end_reminder",
+      {
+        start: filterDateRanges.value.probationEndReminder[0],
+        end: filterDateRanges.value.probationEndReminder[1]
+      }
+    ]);
+  }
+  
+  // 添加年龄范围筛选
+  if (filters.value.ageMin !== null && filters.value.ageMin !== undefined && filters.value.ageMin !== "") {
+    filterParams.age_min = parseInt(filters.value.ageMin);
+  }
+  
+  if (filters.value.ageMax !== null && filters.value.ageMax !== undefined && filters.value.ageMax !== "") {
+    filterParams.age_max = parseInt(filters.value.ageMax);
+  }
+  
+  return filterParams;
+}
+
 // 计算筛选后的干部列表
 const filteredCadreList = computed(() => {
   return cadreList.value.filter(cadre => {
@@ -1557,8 +1810,14 @@ async function exportCadreRoster() {
       return;
     }
     
+    // 构建筛选参数
+    const filterParams = buildFilterParams();
+    
     // 生成基层管理人员名册
-    await invoke("export_grassroots_cadre_roster", { outputPath: filePath });
+    await invoke("export_grassroots_cadre_roster", { 
+      outputPath: filePath,
+      filterParams: filterParams
+    });
     
     alert("导出成功！文件已保存为: " + filePath);
   } catch (error) {

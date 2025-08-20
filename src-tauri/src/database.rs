@@ -1,5 +1,6 @@
 use rusqlite::{Connection, Result, params};
 use std::fs;
+use crate::filter::FilterParams;
 
 pub struct Database {
     conn: Connection,
@@ -762,5 +763,256 @@ impl Database {
         })?.collect();
         
         values
+    }
+    
+    // ==================== Filtered Query Methods ====================
+    
+    // 根据筛选条件获取基层干部信息
+    pub fn get_filtered_grassroots_cadres(&self, filter_params: &FilterParams) -> Result<Vec<GrassrootsCadreInfo>> {
+        let mut query = "SELECT id, serial_number, name, gender, department, section, position1, position2,
+                company_entry_date, company_tenure, work_start_date, work_tenure,
+                current_level_date, position_entry_date, probation_period,
+                probation_end_reminder, id_number, birth_date, age, native_place, birth_place,
+                ethnicity, technical_position, education, full_time_education,
+                full_time_school_major, part_time_education, part_time_school_phone,
+                political_status, party_entry_date, phone, grassroots_vice_position_date,
+                grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
+                midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
+                midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
+                same_department_tenure, remarks, major, contact_date, special_date
+         FROM grassroots_cadres WHERE 1=1".to_string();
+        
+        let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+        let mut param_index = 1;
+        
+        // 处理普通筛选条件
+        for filter in &filter_params.filters {
+            match filter.operator.as_str() {
+                "eq" => {
+                    query.push_str(&format!(" AND {} = ?{}", filter.field, param_index));
+                    params.push(Box::new(filter.value.clone()));
+                    param_index += 1;
+                },
+                "ne" => {
+                    query.push_str(&format!(" AND {} != ?{}", filter.field, param_index));
+                    params.push(Box::new(filter.value.clone()));
+                    param_index += 1;
+                },
+                "like" => {
+                    query.push_str(&format!(" AND {} LIKE ?{}", filter.field, param_index));
+                    params.push(Box::new(format!("%{}%", filter.value)));
+                    param_index += 1;
+                },
+                _ => {}
+            }
+        }
+        
+        // 处理日期范围筛选
+        for (field, date_range) in &filter_params.date_ranges {
+            query.push_str(&format!(" AND {} >= ?{} AND {} <= ?{}", field, param_index, field, param_index + 1));
+            params.push(Box::new(date_range.start.clone()));
+            params.push(Box::new(date_range.end.clone()));
+            param_index += 2;
+        }
+        
+        // 处理年龄范围筛选
+        if let Some(age_min) = filter_params.age_min {
+            query.push_str(&format!(" AND age >= ?{}", param_index));
+            params.push(Box::new(age_min));
+            param_index += 1;
+        }
+        
+        if let Some(age_max) = filter_params.age_max {
+            query.push_str(&format!(" AND age <= ?{}", param_index));
+            params.push(Box::new(age_max));
+            // param_index += 1; // 不需要递增param_index，因为这是最后一个参数
+        }
+        
+        query.push_str(" ORDER BY id");
+        
+        let mut stmt = self.conn.prepare(&query)?;
+        
+        // 执行查询
+        let cadre_iter = stmt.query_map(rusqlite::params_from_iter(params.iter()), |row| {
+            Ok(GrassrootsCadreInfo {
+                id: row.get(0)?,
+                serial_number: row.get(1)?,
+                name: row.get(2)?,
+                gender: row.get(3)?,
+                department: row.get(4)?,
+                section: row.get(5)?,
+                position1: row.get(6)?,
+                position2: row.get(7)?,
+                company_entry_date: row.get(8)?,
+                company_tenure: row.get(9)?,
+                work_start_date: row.get(10)?,
+                work_tenure: row.get(11)?,
+                current_level_date: row.get(12)?,
+                position_entry_date: row.get(13)?,
+                probation_period: row.get(14)?,
+                probation_end_reminder: row.get(15)?,
+                id_number: row.get(16)?,
+                birth_date: row.get(17)?,
+                age: row.get(18)?,
+                native_place: row.get(19)?,
+                birth_place: row.get(20)?,
+                ethnicity: row.get(21)?,
+                technical_position: row.get(22)?,
+                education: row.get(23)?,
+                full_time_education: row.get(24)?,
+                full_time_school_major: row.get(25)?,
+                part_time_education: row.get(26)?,
+                part_time_school_phone: row.get(27)?,
+                political_status: row.get(28)?,
+                party_entry_date: row.get(29)?,
+                phone: row.get(30)?,
+                grassroots_vice_position_date: row.get(31)?,
+                grassroots_vice_tenure: row.get(32)?,
+                grassroots_chief_position_date: row.get(33)?,
+                grassroots_chief_tenure: row.get(34)?,
+                midlevel_assistant_date: row.get(35)?,
+                midlevel_assistant_tenure: row.get(36)?,
+                midlevel_vice_date: row.get(37)?,
+                midlevel_vice_tenure: row.get(38)?,
+                midlevel_chief_date: row.get(39)?,
+                midlevel_chief_tenure: row.get(40)?,
+                same_department_tenure: row.get(41)?,
+                remarks: row.get(42)?,
+                major: row.get(43)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
+            })
+        })?;
+        
+        let mut cadres = Vec::new();
+        for cadre in cadre_iter {
+            cadres.push(cadre?);
+        }
+        
+        Ok(cadres)
+    }
+    
+    // 根据筛选条件获取中层干部信息
+    pub fn get_filtered_midlevel_cadres(&self, filter_params: &FilterParams) -> Result<Vec<MidLevelCadreInfo>> {
+        let mut query = "SELECT id, serial_number, name, gender, department, position1, position2,
+                company_entry_date, company_tenure, work_start_date, work_tenure,
+                current_level_date, position_entry_date, probation_period,
+                probation_end_reminder, id_number, birth_date, age, native_place, birth_place,
+                ethnicity, technical_position, education, full_time_education,
+                full_time_school_major, part_time_education, part_time_school_phone,
+                political_status, party_entry_date, phone, grassroots_vice_position_date,
+                grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
+                midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
+                midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
+                same_department_tenure, remarks, major, contact_date, special_date
+         FROM midlevel_cadres WHERE 1=1".to_string();
+        
+        let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+        let mut param_index = 1;
+        
+        // 处理普通筛选条件
+        for filter in &filter_params.filters {
+            match filter.operator.as_str() {
+                "eq" => {
+                    query.push_str(&format!(" AND {} = ?{}", filter.field, param_index));
+                    params.push(Box::new(filter.value.clone()));
+                    param_index += 1;
+                },
+                "ne" => {
+                    query.push_str(&format!(" AND {} != ?{}", filter.field, param_index));
+                    params.push(Box::new(filter.value.clone()));
+                    param_index += 1;
+                },
+                "like" => {
+                    query.push_str(&format!(" AND {} LIKE ?{}", filter.field, param_index));
+                    params.push(Box::new(format!("%{}%", filter.value)));
+                    param_index += 1;
+                },
+                _ => {}
+            }
+        }
+        
+        // 处理日期范围筛选
+        for (field, date_range) in &filter_params.date_ranges {
+            query.push_str(&format!(" AND {} >= ?{} AND {} <= ?{}", field, param_index, field, param_index + 1));
+            params.push(Box::new(date_range.start.clone()));
+            params.push(Box::new(date_range.end.clone()));
+            param_index += 2;
+        }
+        
+        // 处理年龄范围筛选
+        if let Some(age_min) = filter_params.age_min {
+            query.push_str(&format!(" AND age >= ?{}", param_index));
+            params.push(Box::new(age_min));
+            param_index += 1;
+        }
+        
+        if let Some(age_max) = filter_params.age_max {
+            query.push_str(&format!(" AND age <= ?{}", param_index));
+            params.push(Box::new(age_max));
+            // param_index += 1; // 不需要递增param_index，因为这是最后一个参数
+        }
+        
+        query.push_str(" ORDER BY id");
+        
+        let mut stmt = self.conn.prepare(&query)?;
+        
+        // 执行查询
+        let cadre_iter = stmt.query_map(rusqlite::params_from_iter(params.iter()), |row| {
+            Ok(MidLevelCadreInfo {
+                id: row.get(0)?,
+                serial_number: row.get(1)?,
+                name: row.get(2)?,
+                gender: row.get(3)?,
+                department: row.get(4)?,
+                position1: row.get(5)?,
+                position2: row.get(6)?,
+                company_entry_date: row.get(7)?,
+                company_tenure: row.get(8)?,
+                work_start_date: row.get(9)?,
+                work_tenure: row.get(10)?,
+                current_level_date: row.get(11)?,
+                position_entry_date: row.get(12)?,
+                probation_period: row.get(13)?,
+                probation_end_reminder: row.get(14)?,
+                id_number: row.get(15)?,
+                birth_date: row.get(16)?,
+                age: row.get(17)?,
+                native_place: row.get(18)?,
+                birth_place: row.get(19)?,
+                ethnicity: row.get(20)?,
+                technical_position: row.get(21)?,
+                education: row.get(22)?,
+                full_time_education: row.get(23)?,
+                full_time_school_major: row.get(24)?,
+                part_time_education: row.get(25)?,
+                part_time_school_phone: row.get(26)?,
+                political_status: row.get(27)?,
+                party_entry_date: row.get(28)?,
+                phone: row.get(29)?,
+                grassroots_vice_position_date: row.get(30)?,
+                grassroots_vice_tenure: row.get(31)?,
+                grassroots_chief_position_date: row.get(32)?,
+                grassroots_chief_tenure: row.get(33)?,
+                midlevel_assistant_date: row.get(34)?,
+                midlevel_assistant_tenure: row.get(35)?,
+                midlevel_vice_date: row.get(36)?,
+                midlevel_vice_tenure: row.get(37)?,
+                midlevel_chief_date: row.get(38)?,
+                midlevel_chief_tenure: row.get(39)?,
+                same_department_tenure: row.get(40)?,
+                remarks: row.get(41)?,
+                major: row.get(42)?,
+                contact_date: row.get(43)?,
+                special_date: row.get(44)?,
+            })
+        })?;
+        
+        let mut cadres = Vec::new();
+        for cadre in cadre_iter {
+            cadres.push(cadre?);
+        }
+        
+        Ok(cadres)
     }
 }
