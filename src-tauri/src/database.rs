@@ -41,7 +41,7 @@ pub struct GrassrootsCadreInfo {
     pub party_entry_date: Option<String>,
     pub phone: Option<String>,
     pub grassroots_vice_position_date: Option<String>, // 任基层副职时间
-    pub grassroots_vice_tenure: Option<f32>, // 任基层副职年限
+    pub grassroots_vice_tenure: Option<String>, // 任基层副职年限 (改为文本类型)
     pub grassroots_chief_position_date: Option<String>, // 任基层正职时间
     pub grassroots_chief_tenure: Option<f32>, // 任基层正职年限
     pub midlevel_assistant_date: Option<String>, // 任中层助理层级时间
@@ -93,7 +93,7 @@ pub struct MidLevelCadreInfo {
     pub party_entry_date: Option<String>,
     pub phone: Option<String>,
     pub grassroots_vice_position_date: Option<String>, // 任基层副职时间
-    pub grassroots_vice_tenure: Option<f32>, // 任基层副职年限
+    pub grassroots_vice_tenure: Option<String>, // 任基层副职年限 (改为文本类型)
     pub grassroots_chief_position_date: Option<String>, // 任基层正职时间
     pub grassroots_chief_tenure: Option<f32>, // 任基层正职年限
     pub midlevel_assistant_date: Option<String>, // 任中层助理层级时间
@@ -165,7 +165,7 @@ impl Database {
                 party_entry_date TEXT,
                 phone TEXT,
                 grassroots_vice_position_date TEXT,
-                grassroots_vice_tenure REAL,
+                grassroots_vice_tenure TEXT,
                 grassroots_chief_position_date TEXT,
                 grassroots_chief_tenure REAL,
                 midlevel_assistant_date TEXT,
@@ -218,7 +218,7 @@ impl Database {
                 party_entry_date TEXT,
                 phone TEXT,
                 grassroots_vice_position_date TEXT,
-                grassroots_vice_tenure REAL,
+                grassroots_vice_tenure TEXT,
                 grassroots_chief_position_date TEXT,
                 grassroots_chief_tenure REAL,
                 midlevel_assistant_date TEXT,
@@ -247,7 +247,7 @@ impl Database {
         
         // Handle database migration - add new columns for grassroots cadre information
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_vice_position_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_vice_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_chief_position_date TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_chief_tenure REAL", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_assistant_date TEXT", []);
@@ -261,7 +261,7 @@ impl Database {
         
         // Handle database migration - add new columns for midlevel cadre information
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_vice_position_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_vice_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_chief_position_date TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_chief_tenure REAL", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_assistant_date TEXT", []);

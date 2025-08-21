@@ -306,6 +306,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
+                @change="calculateGrassrootsViceTenure"
                 clearable
                 style="width: 100%"
               />
@@ -313,7 +314,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="任基层副职年限">
-              <el-input-number v-model="formData.grassroots_vice_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.grassroots_vice_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -323,6 +324,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
+                @change="calculateGrassrootsViceTenure"
                 clearable
                 style="width: 100%"
               />
@@ -845,6 +847,51 @@ function extractIdInfo() {
     formData.value.birth_date = "";
     formData.value.age = null;
   }
+}
+
+// 计算任基层副职年限
+function calculateGrassrootsViceTenure() {
+  // 如果有任基层正职时间，则用正职时间减去副职时间
+  if (formData.value.grassroots_chief_position_date && formData.value.grassroots_vice_position_date) {
+    const viceDate = formData.value.grassroots_vice_position_date instanceof Date 
+      ? formData.value.grassroots_vice_position_date 
+      : new Date(formData.value.grassroots_vice_position_date);
+      
+    const chiefDate = formData.value.grassroots_chief_position_date instanceof Date 
+      ? formData.value.grassroots_chief_position_date 
+      : new Date(formData.value.grassroots_chief_position_date);
+    
+    if (!isNaN(viceDate.getTime()) && !isNaN(chiefDate.getTime()) && chiefDate >= viceDate) {
+      const diffTime = chiefDate - viceDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.grassroots_vice_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有基层正职时间，则按照当前时间减去副职时间
+  if (formData.value.grassroots_vice_position_date) {
+    const viceDate = formData.value.grassroots_vice_position_date instanceof Date 
+      ? formData.value.grassroots_vice_position_date 
+      : new Date(formData.value.grassroots_vice_position_date);
+      
+    if (!isNaN(viceDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - viceDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.grassroots_vice_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.grassroots_vice_tenure = "";
 }
 </script>
 

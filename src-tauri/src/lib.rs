@@ -92,7 +92,7 @@ fn export_grassroots_cadre_info_to_excel(
                         "work_start_date" => cadre.work_start_date.clone().unwrap_or_default(),
                         "work_tenure" => cadre.work_tenure.unwrap_or(0.0).to_string(),
                         "grassroots_vice_position_date" => cadre.grassroots_vice_position_date.clone().unwrap_or_default(),
-                        "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.unwrap_or(0.0).to_string(),
+                        "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.clone().unwrap_or_default(),
                         "grassroots_chief_position_date" => cadre.grassroots_chief_position_date.clone().unwrap_or_default(),
                         "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.unwrap_or(0.0).to_string(),
                         "midlevel_assistant_date" => cadre.midlevel_assistant_date.clone().unwrap_or_default(),
@@ -205,7 +205,7 @@ fn export_midlevel_cadre_info_to_excel(
                         "work_start_date" => cadre.work_start_date.clone().unwrap_or_default(),
                         "work_tenure" => cadre.work_tenure.unwrap_or(0.0).to_string(),
                         "grassroots_vice_position_date" => cadre.grassroots_vice_position_date.clone().unwrap_or_default(),
-                        "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.unwrap_or(0.0).to_string(),
+                        "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.clone().unwrap_or_default(),
                         "grassroots_chief_position_date" => cadre.grassroots_chief_position_date.clone().unwrap_or_default(),
                         "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.unwrap_or(0.0).to_string(),
                         "midlevel_assistant_date" => cadre.midlevel_assistant_date.clone().unwrap_or_default(),
@@ -475,7 +475,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
     let party_entry_date_raw = get_cell_value(27); // 入党时间
     let phone = get_cell_value(28); // 联系电话
     let grassroots_vice_position_date_raw = get_cell_value(29); // 任基层副职时间
-    let grassroots_vice_tenure_str = get_cell_value(30); // 任基层副职年限
+    let _grassroots_vice_tenure_str = get_cell_value(30); // 任基层副职年限
     let grassroots_chief_position_date_raw = get_cell_value(31); // 任基层正职时间
     let grassroots_chief_tenure_str = get_cell_value(32); // 任基层正职年限
     let midlevel_assistant_date_raw = get_cell_value(33); // 任中层助理时间
@@ -504,11 +504,39 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
     let midlevel_vice_date = normalize_date_format(&midlevel_vice_date_raw);
     let midlevel_chief_date = normalize_date_format(&midlevel_chief_date_raw);
     
-    // 解析新增的数字字段
-    let grassroots_vice_tenure = if !grassroots_vice_tenure_str.is_empty() {
-        grassroots_vice_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任基层副职年限
+    let grassroots_vice_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任基层正职时间，则用正职时间减去副职时间
+        if !grassroots_chief_position_date_raw.is_empty() && !grassroots_vice_position_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_vice_position_date_raw), "%Y-%m-%d") {
+                if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                    if chief_date >= vice_date {
+                        let diff_days = (chief_date - vice_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有基层正职时间，则按照当前时间减去副职时间
+        else if !grassroots_vice_position_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_vice_position_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - vice_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
     let grassroots_chief_tenure = if !grassroots_chief_tenure_str.is_empty() {
@@ -726,7 +754,7 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
     let party_entry_date_raw = get_cell_value(26); // 入党时间
     let phone = get_cell_value(27); // 联系电话
     let grassroots_vice_position_date_raw = get_cell_value(28); // 任基层副职时间
-    let grassroots_vice_tenure_str = get_cell_value(29); // 任基层副职年限
+    let _grassroots_vice_tenure_str = get_cell_value(29); // 任基层副职年限
     let grassroots_chief_position_date_raw = get_cell_value(30); // 任基层正职时间
     let grassroots_chief_tenure_str = get_cell_value(31); // 任基层正职年限
     let midlevel_assistant_date_raw = get_cell_value(32); // 任中层助理时间
@@ -755,11 +783,39 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
     let midlevel_vice_date = normalize_date_format(&midlevel_vice_date_raw);
     let midlevel_chief_date = normalize_date_format(&midlevel_chief_date_raw);
     
-    // 解析新增的数字字段
-    let grassroots_vice_tenure = if !grassroots_vice_tenure_str.is_empty() {
-        grassroots_vice_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任基层副职年限
+    let grassroots_vice_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任基层正职时间，则用正职时间减去副职时间
+        if !grassroots_chief_position_date_raw.is_empty() && !grassroots_vice_position_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_vice_position_date_raw), "%Y-%m-%d") {
+                if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                    if chief_date >= vice_date {
+                        let diff_days = (chief_date - vice_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有基层正职时间，则按照当前时间减去副职时间
+        else if !grassroots_vice_position_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_vice_position_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - vice_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
     let grassroots_chief_tenure = if !grassroots_chief_tenure_str.is_empty() {
@@ -947,7 +1003,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "18位身份证号", "YYYY-MM-DD", "数字", "地区", 
                           "地区", "民族名称", "职务名称", "学历名称", "学历名称", "学校专业", 
                           "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", "手机号码", 
-                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
+                          "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "数字", 
                           "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
                           "YYYY-MM-DD", "数字", "数字", "备注信息"])?;
             
@@ -959,9 +1015,9 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "北京", "汉族", "高级工程师", "硕士研究生", "硕士研究生", 
                           "清华大学计算机系", "硕士研究生", "清华大学计算机系", "中共党员", 
                           "2015-06-15", "13800138000", 
-                          "2018-05-10", "2.5", "2020-01-15", "1.2", 
-                          "2019-03-20", "1.8", "2021-06-01", "0.5", 
-                          "2022-01-10", "0.3", "2.0", "优秀员工"])?;
+                          "2018-05-10", "2年3月", "2020-01-15", "1年2月", 
+                          "2019-03-20", "1年8月", "2021-06-01", "0年5月", 
+                          "2022-01-10", "0年3月", "2年0月", "优秀员工"])?;
         } else {
             // 基层管理人员模板 (包含科室字段和自动计算字段)
             sheet_writer.append_row(row!["姓名", "性别", "部门", "科室", "职务1", "职务2", 
@@ -981,7 +1037,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "18位身份证号", "YYYY-MM-DD", "数字", "地区", 
                           "地区", "民族名称", "职务名称", "学历名称", "学历名称", "学校专业", 
                           "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", "手机号码", 
-                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
+                          "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "数字", 
                           "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
                           "YYYY-MM-DD", "数字", "数字", "备注信息"])?;
             
@@ -993,9 +1049,9 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "北京", "汉族", "高级工程师", "硕士研究生", "硕士研究生", 
                           "清华大学计算机系", "硕士研究生", "清华大学计算机系", "中共党员", 
                           "2015-06-15", "13800138000", 
-                          "2018-05-10", "2.5", "2020-01-15", "1.2", 
-                          "2019-03-20", "1.8", "2021-06-01", "0.5", 
-                          "2022-01-10", "0.3", "2.0", "优秀员工"])?;
+                          "2018-05-10", "2年3月", "2020-01-15", "1年2月", 
+                          "2019-03-20", "1年8月", "2021-06-01", "0年5月", 
+                          "2022-01-10", "0年3月", "2年0月", "优秀员工"])?;
         }
         
         // 写入政治面貌选项说明
