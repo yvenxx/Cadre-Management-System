@@ -390,14 +390,8 @@ fn convert_excel_date_to_string(excel_date: &ExcelDateTime) -> String {
     // 但 chrono::NaiveDate 从 1970 年开始计算，所以我们需要先计算出距离 1970 年的天数
     
     // 1900 年 1 月 1 日距离 1970 年 1 月 1 日的天数 (负数)
-    // 但是 Excel 有一个著名的错误，它认为 1900 年是闰年（实际上不是）
-    // 这意味着在 1900 年 3 月 1 日之前，Excel 的日期会比实际多一天
-    // 我们需要处理这个错误
-    
-    // 计算从 1900-01-01 到 1970-01-01 的天数
     // 1970-01-01 是 Excel 日期序列 25569 (对于 1900-based 系统)
-    // 但是由于 Excel 的 1900 闰年错误，实际的偏移量是 25568
-    let excel_epoch_days = 25568;
+    let excel_epoch_days = 25569;
     
     // 将 Excel 序列日期数转换为距离 1970-01-01 的天数
     let days_since_epoch = serial_date - excel_epoch_days as f64;
