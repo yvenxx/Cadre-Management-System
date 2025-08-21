@@ -9,7 +9,7 @@
       
       <!-- 统计信息概览 -->
       <el-row :gutter="20" style="margin-bottom: 30px;">
-        <el-col :span="6">
+        <el-col :span="8">
           <el-card class="overview-card">
             <div class="overview-content">
               <h3>总人数</h3>
@@ -17,35 +17,19 @@
             </div>
           </el-card>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-card class="overview-card">
             <div class="overview-content">
-              <h3>基层正职数</h3>
+              <h3>正职数</h3>
               <p class="overview-number">{{ chiefCount }}</p>
             </div>
           </el-card>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-card class="overview-card">
             <div class="overview-content">
-              <h3>基层副职数</h3>
+              <h3>副职数</h3>
               <p class="overview-number">{{ viceCount }}</p>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card class="overview-card">
-            <div class="overview-content">
-              <h3>中层正职数</h3>
-              <p class="overview-number">{{ midLevelChiefCount }}</p>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="6">
-          <el-card class="overview-card">
-            <div class="overview-content">
-              <h3>中层副职数</h3>
-              <p class="overview-number">{{ midLevelViceCount }}</p>
             </div>
           </el-card>
         </el-col>
@@ -406,26 +390,6 @@ const positionTableData = computed(() => {
   }));
 });
 
-// 获取中层正职数（部长、经理、主任）
-const midLevelChiefCount = computed(() => {
-  return cadreList.value.filter(cadre => 
-    cadre.position1 === '部长' || cadre.position2 === '部长' ||
-    cadre.position1 === '经理' || cadre.position2 === '经理' ||
-    cadre.position1 === '主任' || cadre.position2 === '主任'
-  ).length;
-});
-
-// 获取中层副职数（副部长、副经理、副主任、部长助理、经理助理、主任助理）
-const midLevelViceCount = computed(() => {
-  return cadreList.value.filter(cadre => 
-    cadre.position1 === '副部长' || cadre.position2 === '副部长' ||
-    cadre.position1 === '副经理' || cadre.position2 === '副经理' ||
-    cadre.position1 === '副主任' || cadre.position2 === '副主任' ||
-    cadre.position1 === '部长助理' || cadre.position2 === '部长助理' ||
-    cadre.position1 === '经理助理' || cadre.position2 === '经理助理' ||
-    cadre.position1 === '主任助理' || cadre.position2 === '主任助理'
-  ).length;
-});
 
 // 获取最高学历分布统计表格数据
 const educationTableData = computed(() => {
