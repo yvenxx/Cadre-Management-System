@@ -243,17 +243,18 @@ async function loadCadreInfo() {
   }
 }
 
-// 获取中层正职数（部长）
+// 获取中层正职数（部长、经理、主任）
 const chiefCount = computed(() => {
   return cadreList.value.filter(cadre => 
-    cadre.position1?.includes('部长') || cadre.position2?.includes('部长')
+    cadre.position1 === '部长' || cadre.position1 === '经理' || cadre.position1 === '主任'
   ).length;
 });
 
-// 获取中层副职数（副部长）
+// 获取中层副职数（副部长、副经理、副主任、部长助理、经理助理、主任助理）
 const viceCount = computed(() => {
   return cadreList.value.filter(cadre => 
-    cadre.position1?.includes('副部长') || cadre.position2?.includes('副部长')
+    cadre.position1 === '副部长' || cadre.position1 === '副经理' || cadre.position1 === '副主任' ||
+    cadre.position1 === '部长助理' || cadre.position1 === '经理助理' || cadre.position1 === '主任助理'
   ).length;
 });
 
