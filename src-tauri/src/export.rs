@@ -41,6 +41,18 @@ static FIELD_LABELS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
         ("major", "专业"),
         ("contact_date", "联系日期"),
         ("special_date", "特殊日期"),
+        // 新增的字段映射
+        ("grassroots_vice_position_date", "任基层副职时间"),
+        ("grassroots_vice_tenure", "任基层副职年限"),
+        ("grassroots_chief_position_date", "任基层正职时间"),
+        ("grassroots_chief_tenure", "任基层正职年限"),
+        ("midlevel_assistant_date", "任中层助理时间"),
+        ("midlevel_assistant_tenure", "任中层助理年限"),
+        ("midlevel_vice_date", "任中层副职时间"),
+        ("midlevel_vice_tenure", "任中层副职年限"),
+        ("midlevel_chief_date", "任中层正职时间"),
+        ("midlevel_chief_tenure", "任中层正职年限"),
+        ("same_department_tenure", "同部门任职年限"),
     ].iter().cloned().collect()
 });
 
