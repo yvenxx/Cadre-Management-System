@@ -1344,6 +1344,19 @@ fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: S
         template_path = exe_dir.join("..").join("..").join("templates").join("基层管理人员名册.xlsx");
     }
     
+    // 如果还找不到，则尝试使用Tauri的资源路径（打包后）
+    if !template_path.exists() {
+        // 尝试获取应用的资源目录
+        if let Ok(current_exe) = std::env::current_exe() {
+            if let Some(parent_dir) = current_exe.parent() {
+                let resource_path = parent_dir.join("templates").join("基层管理人员名册.xlsx");
+                if resource_path.exists() {
+                    template_path = resource_path;
+                }
+            }
+        }
+    }
+    
     // 检查模板是否存在
     if !template_path.exists() {
         // 获取当前工作目录，用于调试
@@ -1475,6 +1488,19 @@ fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: Str
     // 如果还找不到，则尝试在src-tauri目录下的templates子目录中查找（开发环境）
     if !template_path.exists() {
         template_path = exe_dir.join("..").join("..").join("templates").join("中层管理人员名册.xlsx");
+    }
+    
+    // 如果还找不到，则尝试使用Tauri的资源路径（打包后）
+    if !template_path.exists() {
+        // 尝试获取应用的资源目录
+        if let Ok(current_exe) = std::env::current_exe() {
+            if let Some(parent_dir) = current_exe.parent() {
+                let resource_path = parent_dir.join("templates").join("中层管理人员名册.xlsx");
+                if resource_path.exists() {
+                    template_path = resource_path;
+                }
+            }
+        }
     }
     
     // 检查模板是否存在
