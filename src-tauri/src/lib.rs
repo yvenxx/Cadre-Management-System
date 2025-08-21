@@ -101,6 +101,7 @@ fn export_grassroots_cadre_info_to_excel(
                         "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.unwrap_or(0.0).to_string(),
                         "midlevel_chief_date" => cadre.midlevel_chief_date.clone().unwrap_or_default(),
                         "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.unwrap_or(0.0).to_string(),
+                        "same_department_date" => cadre.same_department_date.clone().unwrap_or_default(),
                         "same_department_tenure" => cadre.same_department_tenure.unwrap_or(0.0).to_string(),
                         _ => String::new(),
                     };
@@ -213,6 +214,7 @@ fn export_midlevel_cadre_info_to_excel(
                         "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.unwrap_or(0.0).to_string(),
                         "midlevel_chief_date" => cadre.midlevel_chief_date.clone().unwrap_or_default(),
                         "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.unwrap_or(0.0).to_string(),
+                        "same_department_date" => cadre.same_department_date.clone().unwrap_or_default(),
                         "same_department_tenure" => cadre.same_department_tenure.unwrap_or(0.0).to_string(),
                         _ => String::new(),
                     };
@@ -488,8 +490,9 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
     let midlevel_vice_tenure_str = get_cell_value(36); // 任中层副职年限
     let midlevel_chief_date_raw = get_cell_value(37); // 任中层正职时间
     let midlevel_chief_tenure_str = get_cell_value(38); // 任中层正职年限
-    let same_department_tenure_str = get_cell_value(39); // 同部门任职年限
-    let remarks = get_cell_value(40); // 备注
+    let same_department_date_raw = get_cell_value(39); // 同部门任职时间
+    let same_department_tenure_str = get_cell_value(40); // 同部门任职年限
+    let remarks = get_cell_value(41); // 备注
     
     // 对日期字段应用标准化函数
     let company_entry_date = normalize_date_format(&company_entry_date_raw); // 入司日期
@@ -498,6 +501,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
     let position_entry_date = normalize_date_format(&position_entry_date_raw); // 任职时间
     let party_entry_date = normalize_date_format(&party_entry_date_raw); // 入党时间
     let _birth_date = normalize_date_format(&birth_date_raw); // 出生日期
+    let same_department_date = normalize_date_format(&same_department_date_raw); // 同部门任职时间
     
     // 标准化新增的日期字段
     let grassroots_vice_position_date = normalize_date_format(&grassroots_vice_position_date_raw);
@@ -655,6 +659,7 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
         midlevel_vice_tenure: midlevel_vice_tenure, // 任中层副职年限
         midlevel_chief_date: Some(midlevel_chief_date), // 任中层正职时间
         midlevel_chief_tenure: midlevel_chief_tenure, // 任中层正职年限
+        same_department_date: Some(same_department_date), // 同部门任职时间
         same_department_tenure: same_department_tenure, // 同部门任职年限
         remarks: Some(remarks), // 备注
         major: None, // 专业字段（未在Excel中使用）
@@ -736,8 +741,9 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
     let midlevel_vice_tenure_str = get_cell_value(35); // 任中层副职年限
     let midlevel_chief_date_raw = get_cell_value(36); // 任中层正职时间
     let midlevel_chief_tenure_str = get_cell_value(37); // 任中层正职年限
-    let same_department_tenure_str = get_cell_value(38); // 同部门任职年限
-    let remarks = get_cell_value(39); // 备注
+    let same_department_date_raw = get_cell_value(38); // 同部门任职时间
+    let same_department_tenure_str = get_cell_value(39); // 同部门任职年限
+    let remarks = get_cell_value(40); // 备注
     
     // 对日期字段应用标准化函数
     let company_entry_date = normalize_date_format(&company_entry_date_raw); // 入司日期
@@ -746,6 +752,7 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
     let position_entry_date = normalize_date_format(&position_entry_date_raw); // 任职时间
     let party_entry_date = normalize_date_format(&party_entry_date_raw); // 入党时间
     let _birth_date = normalize_date_format(&birth_date_raw); // 出生日期
+    let same_department_date = normalize_date_format(&same_department_date_raw); // 同部门任职时间
     
     // 标准化新增的日期字段
     let grassroots_vice_position_date = normalize_date_format(&grassroots_vice_position_date_raw);
@@ -902,6 +909,7 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
         midlevel_vice_tenure: midlevel_vice_tenure, // 任中层副职年限
         midlevel_chief_date: Some(midlevel_chief_date), // 任中层正职时间
         midlevel_chief_tenure: midlevel_chief_tenure, // 任中层正职年限
+        same_department_date: Some(same_department_date), // 同部门任职时间
         same_department_tenure: same_department_tenure, // 同部门任职年限
         remarks: Some(remarks), // 备注
         major: None, // 专业字段（未在Excel中使用）

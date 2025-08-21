@@ -712,7 +712,8 @@ const exportFields = [
   { key: "political_status", label: "政治面貌" },
   { key: "party_entry_date", label: "入党时间" },
   { key: "phone", label: "联系电话" },
-  { key: "remarks", label: "备注" }
+  { key: "same_department_date", label: "同部门任职时间" },
+  { key: "same_department_tenure", label: "同部门任职年限" },
 ];
 
 const currentCadre = ref({
@@ -746,6 +747,8 @@ const currentCadre = ref({
   political_status: "",
   party_entry_date: "",
   phone: "",
+  same_department_date: "",
+  same_department_tenure: null,
   remarks: "",
   major: "",
   contact_date: "",

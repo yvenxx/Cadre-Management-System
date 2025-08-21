@@ -52,6 +52,7 @@ static FIELD_LABELS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
         ("midlevel_vice_tenure", "任中层副职年限"),
         ("midlevel_chief_date", "任中层正职时间"),
         ("midlevel_chief_tenure", "任中层正职年限"),
+        ("same_department_date", "同部门任职时间"),
         ("same_department_tenure", "同部门任职年限"),
     ].iter().cloned().collect()
 });

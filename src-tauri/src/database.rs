@@ -50,6 +50,7 @@ pub struct GrassrootsCadreInfo {
     pub midlevel_vice_tenure: Option<f32>, // 任中层副职年限
     pub midlevel_chief_date: Option<String>, // 任中层正职时间
     pub midlevel_chief_tenure: Option<f32>, // 任中层正职年限
+    pub same_department_date: Option<String>, // 同部门任职时间
     pub same_department_tenure: Option<f32>, // 同部门任职年限
     pub remarks: Option<String>,
     pub major: Option<String>,
@@ -101,6 +102,7 @@ pub struct MidLevelCadreInfo {
     pub midlevel_vice_tenure: Option<f32>, // 任中层副职年限
     pub midlevel_chief_date: Option<String>, // 任中层正职时间
     pub midlevel_chief_tenure: Option<f32>, // 任中层正职年限
+    pub same_department_date: Option<String>, // 同部门任职时间
     pub same_department_tenure: Option<f32>, // 同部门任职年限
     pub remarks: Option<String>,
     pub major: Option<String>,
@@ -172,6 +174,7 @@ impl Database {
                 midlevel_vice_tenure REAL,
                 midlevel_chief_date TEXT,
                 midlevel_chief_tenure REAL,
+                same_department_date TEXT,
                 same_department_tenure REAL,
                 remarks TEXT,
                 major TEXT,
@@ -224,6 +227,7 @@ impl Database {
                 midlevel_vice_tenure REAL,
                 midlevel_chief_date TEXT,
                 midlevel_chief_tenure REAL,
+                same_department_date TEXT,
                 same_department_tenure REAL,
                 remarks TEXT,
                 major TEXT,
@@ -252,6 +256,7 @@ impl Database {
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_vice_tenure REAL", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_chief_date TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN same_department_date TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN same_department_tenure REAL", []);
         
         // Handle database migration - add new columns for midlevel cadre information
@@ -265,6 +270,7 @@ impl Database {
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_vice_tenure REAL", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_chief_date TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN same_department_date TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN same_department_tenure REAL", []);
         
         Ok(Database { conn })
@@ -285,10 +291,10 @@ impl Database {
                 grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                 midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                 midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                same_department_tenure, remarks, major, contact_date, special_date
+                same_department_date, same_department_tenure, remarks, major, contact_date, special_date
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15,
                       ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29,
-                      ?30, ?31, ?32, ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43, ?44, ?45)",
+                      ?30, ?31, ?32, ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43, ?44, ?45, ?46)",
             params![
                 cadre.serial_number, &cadre.name, cadre.gender, cadre.department, cadre.section,
                 cadre.position1, cadre.position2, cadre.company_entry_date, cadre.company_tenure,
@@ -301,7 +307,7 @@ impl Database {
                 cadre.grassroots_vice_tenure, cadre.grassroots_chief_position_date, cadre.grassroots_chief_tenure,
                 cadre.midlevel_assistant_date, cadre.midlevel_assistant_tenure, cadre.midlevel_vice_date,
                 cadre.midlevel_vice_tenure, cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
-                cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
+                cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
             ],
         )
     }
@@ -318,7 +324,7 @@ impl Database {
                     grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                     midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                     midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                    same_department_tenure, remarks, major, contact_date, special_date
+                    same_department_date, same_department_tenure, remarks, major, contact_date, special_date
              FROM grassroots_cadres"
         )?;
         
@@ -365,11 +371,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
                 midlevel_chief_tenure: row.get(40)?,
-                same_department_tenure: row.get(41)?,
-                remarks: row.get(42)?,
-                major: row.get(43)?,
-                contact_date: row.get(44)?,
-                special_date: row.get(45)?,
+                same_department_date: row.get(41)?,
+                same_department_tenure: row.get(42)?,
+                remarks: row.get(43)?,
+                major: row.get(44)?,
+                contact_date: row.get(45)?,
+                special_date: row.get(46)?,
             })
         })?;
         
@@ -440,11 +447,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
                 midlevel_chief_tenure: row.get(40)?,
-                same_department_tenure: row.get(41)?,
-                remarks: row.get(42)?,
-                major: row.get(43)?,
-                contact_date: row.get(44)?,
-                special_date: row.get(45)?,
+                same_department_date: row.get(41)?,
+                same_department_tenure: row.get(42)?,
+                remarks: row.get(43)?,
+                major: row.get(44)?,
+                contact_date: row.get(45)?,
+                special_date: row.get(46)?,
             })
         })?;
         
@@ -471,9 +479,9 @@ impl Database {
                 midlevel_assistant_date = ?35, midlevel_assistant_tenure = ?36,
                 midlevel_vice_date = ?37, midlevel_vice_tenure = ?38,
                 midlevel_chief_date = ?39, midlevel_chief_tenure = ?40,
-                same_department_tenure = ?41, remarks = ?42, major = ?43, contact_date = ?44,
-                special_date = ?45
-             WHERE id = ?46",
+                same_department_date = ?41, same_department_tenure = ?42, remarks = ?43, major = ?44, contact_date = ?45,
+                special_date = ?46
+             WHERE id = ?47",
             params![
                 cadre.serial_number, &cadre.name, cadre.gender, cadre.department, cadre.section,
                 cadre.position1, cadre.position2, cadre.company_entry_date, cadre.company_tenure,
@@ -488,7 +496,7 @@ impl Database {
                 cadre.midlevel_assistant_date, cadre.midlevel_assistant_tenure,
                 cadre.midlevel_vice_date, cadre.midlevel_vice_tenure,
                 cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
-                cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date,
+                cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date,
                 cadre.special_date, cadre.id
             ],
         )
@@ -513,7 +521,7 @@ impl Database {
                 grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                 midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                 midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                same_department_tenure, remarks, major, contact_date, special_date
+                same_department_date, same_department_tenure, remarks, major, contact_date, special_date
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15,
                       ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29,
                       ?30, ?31, ?32, ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43, ?44)",
@@ -529,7 +537,7 @@ impl Database {
                 cadre.grassroots_vice_tenure, cadre.grassroots_chief_position_date, cadre.grassroots_chief_tenure,
                 cadre.midlevel_assistant_date, cadre.midlevel_assistant_tenure, cadre.midlevel_vice_date,
                 cadre.midlevel_vice_tenure, cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
-                cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
+                cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
             ],
         )
     }
@@ -546,7 +554,7 @@ impl Database {
                     grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                     midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                     midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                    same_department_tenure, remarks, major, contact_date, special_date
+                    same_department_date, same_department_tenure, remarks, major, contact_date, special_date
              FROM midlevel_cadres"
         )?;
         
@@ -592,11 +600,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
                 midlevel_chief_tenure: row.get(39)?,
-                same_department_tenure: row.get(40)?,
-                remarks: row.get(41)?,
-                major: row.get(42)?,
-                contact_date: row.get(43)?,
-                special_date: row.get(44)?,
+                same_department_date: row.get(40)?,
+                same_department_tenure: row.get(41)?,
+                remarks: row.get(42)?,
+                major: row.get(43)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         
@@ -620,7 +629,7 @@ impl Database {
                     grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                     midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                     midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                    same_department_tenure, remarks, major, contact_date, special_date
+                    same_department_date, same_department_tenure, remarks, major, contact_date, special_date
              FROM midlevel_cadres WHERE id = ?1"
         )?;
         
@@ -666,11 +675,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
                 midlevel_chief_tenure: row.get(39)?,
-                same_department_tenure: row.get(40)?,
-                remarks: row.get(41)?,
-                major: row.get(42)?,
-                contact_date: row.get(43)?,
-                special_date: row.get(44)?,
+                same_department_date: row.get(40)?,
+                same_department_tenure: row.get(41)?,
+                remarks: row.get(42)?,
+                major: row.get(43)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         
@@ -697,9 +707,9 @@ impl Database {
                 midlevel_assistant_date = ?34, midlevel_assistant_tenure = ?35,
                 midlevel_vice_date = ?36, midlevel_vice_tenure = ?37,
                 midlevel_chief_date = ?38, midlevel_chief_tenure = ?39,
-                same_department_tenure = ?40, remarks = ?41, major = ?42, contact_date = ?43,
-                special_date = ?44
-             WHERE id = ?45",
+                same_department_date = ?40, same_department_tenure = ?41, remarks = ?42, major = ?43, contact_date = ?44,
+                special_date = ?45
+             WHERE id = ?46",
             params![
                 cadre.serial_number, &cadre.name, cadre.gender, cadre.department,
                 cadre.position1, cadre.position2, cadre.company_entry_date, cadre.company_tenure,
@@ -714,7 +724,7 @@ impl Database {
                 cadre.midlevel_assistant_date, cadre.midlevel_assistant_tenure,
                 cadre.midlevel_vice_date, cadre.midlevel_vice_tenure,
                 cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
-                cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date,
+                cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date,
                 cadre.special_date, cadre.id
             ],
         )
@@ -779,7 +789,7 @@ impl Database {
                 grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                 midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                 midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                same_department_tenure, remarks, major, contact_date, special_date
+                same_department_date, same_department_tenure, remarks, major, contact_date, special_date
          FROM grassroots_cadres WHERE 1=1".to_string();
         
         let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -876,11 +886,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
                 midlevel_chief_tenure: row.get(40)?,
-                same_department_tenure: row.get(41)?,
-                remarks: row.get(42)?,
-                major: row.get(43)?,
-                contact_date: row.get(44)?,
-                special_date: row.get(45)?,
+                same_department_date: row.get(41)?,
+                same_department_tenure: row.get(42)?,
+                remarks: row.get(43)?,
+                major: row.get(44)?,
+                contact_date: row.get(45)?,
+                special_date: row.get(46)?,
             })
         })?;
         
@@ -1000,11 +1011,12 @@ impl Database {
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
                 midlevel_chief_tenure: row.get(39)?,
-                same_department_tenure: row.get(40)?,
-                remarks: row.get(41)?,
-                major: row.get(42)?,
-                contact_date: row.get(43)?,
-                special_date: row.get(44)?,
+                same_department_date: row.get(40)?,
+                same_department_tenure: row.get(41)?,
+                remarks: row.get(42)?,
+                major: row.get(43)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         

@@ -394,6 +394,19 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
+            <el-form-item label="同部门任职时间">
+              <el-date-picker 
+                v-model="formData.same_department_date" 
+                type="date"
+                placeholder="请选择日期"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="同部门任职年限">
               <el-input-number v-model="formData.same_department_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
             </el-form-item>
@@ -464,6 +477,7 @@ const props = defineProps({
       midlevel_vice_tenure: null,
       midlevel_chief_date: "",
       midlevel_chief_tenure: null,
+      same_department_date: "",
       same_department_tenure: null,
       remarks: "",
       major: "",

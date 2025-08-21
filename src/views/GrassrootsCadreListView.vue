@@ -738,6 +738,7 @@ const exportFields = [
   { key: "midlevel_vice_tenure", label: "任中层副职年限" },
   { key: "midlevel_chief_date", label: "任中层正职时间" },
   { key: "midlevel_chief_tenure", label: "任中层正职年限" },
+  { key: "same_department_date", label: "同部门任职时间" },
   { key: "same_department_tenure", label: "同部门任职年限" },
   { key: "remarks", label: "备注" }
 ];
@@ -783,6 +784,7 @@ const currentCadre = ref({
   midlevel_vice_tenure: null,
   midlevel_chief_date: "",
   midlevel_chief_tenure: null,
+  same_department_date: "",
   same_department_tenure: null,
   remarks: "",
   major: "",
