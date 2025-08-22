@@ -324,7 +324,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
-                @change="calculateGrassrootsViceTenure"
+                @change="calculateGrassrootsChiefTenure"
                 clearable
                 style="width: 100%"
               />
@@ -335,7 +335,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="任基层正职年限">
-              <el-input-number v-model="formData.grassroots_chief_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.grassroots_chief_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -345,6 +345,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
+                @change="calculateMidlevelAssistantTenure"
                 clearable
                 style="width: 100%"
               />
@@ -352,7 +353,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="任中层助理年限">
-              <el-input-number v-model="formData.midlevel_assistant_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.midlevel_assistant_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
         </el-row>
@@ -365,6 +366,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
+                @change="calculateMidlevelViceTenure"
                 clearable
                 style="width: 100%"
               />
@@ -372,7 +374,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="任中层副职年限">
-              <el-input-number v-model="formData.midlevel_vice_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.midlevel_vice_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -382,6 +384,7 @@
                 type="date"
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
+                @change="calculateMidlevelChiefTenure"
                 clearable
                 style="width: 100%"
               />
@@ -392,7 +395,7 @@
         <el-row :gutter="20">
           <el-col :span="8">
             <el-form-item label="任中层正职年限">
-              <el-input-number v-model="formData.midlevel_chief_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.midlevel_chief_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -403,6 +406,7 @@
                 placeholder="请选择日期"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
+                @change="calculateSameDepartmentTenure"
                 clearable
                 style="width: 100%"
               />
@@ -410,7 +414,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="同部门任职年限">
-              <el-input-number v-model="formData.same_department_tenure" :min="0" :step="0.1" placeholder="请输入年限" controls-position="right" style="width: 100%" />
+              <el-input v-model="formData.same_department_tenure" placeholder="自动计算" disabled />
             </el-form-item>
           </el-col>
         </el-row>
@@ -892,6 +896,189 @@ function calculateGrassrootsViceTenure() {
   
   // 如果没有足够的信息计算，则清空年限
   formData.value.grassroots_vice_tenure = "";
+}
+
+// 计算任基层正职年限
+function calculateGrassrootsChiefTenure() {
+  // 如果有任中层助理层级时间，则用任中层助理层级时间减去任基层正职时间
+  if (formData.value.midlevel_assistant_date && formData.value.grassroots_chief_position_date) {
+    const chiefDate = formData.value.grassroots_chief_position_date instanceof Date 
+      ? formData.value.grassroots_chief_position_date 
+      : new Date(formData.value.grassroots_chief_position_date);
+      
+    const assistantDate = formData.value.midlevel_assistant_date instanceof Date 
+      ? formData.value.midlevel_assistant_date 
+      : new Date(formData.value.midlevel_assistant_date);
+    
+    if (!isNaN(chiefDate.getTime()) && !isNaN(assistantDate.getTime()) && assistantDate >= chiefDate) {
+      const diffTime = assistantDate - chiefDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.grassroots_chief_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有任中层助理层级时间，则使用当前时间减去任基层正职时间
+  if (formData.value.grassroots_chief_position_date) {
+    const chiefDate = formData.value.grassroots_chief_position_date instanceof Date 
+      ? formData.value.grassroots_chief_position_date 
+      : new Date(formData.value.grassroots_chief_position_date);
+      
+    if (!isNaN(chiefDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - chiefDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.grassroots_chief_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.grassroots_chief_tenure = "";
+}
+
+// 计算任中层助理年限
+function calculateMidlevelAssistantTenure() {
+  // 如果有任中层副职时间，则用任中层副职时间减去任中层助理层级时间
+  if (formData.value.midlevel_vice_date && formData.value.midlevel_assistant_date) {
+    const assistantDate = formData.value.midlevel_assistant_date instanceof Date 
+      ? formData.value.midlevel_assistant_date 
+      : new Date(formData.value.midlevel_assistant_date);
+      
+    const viceDate = formData.value.midlevel_vice_date instanceof Date 
+      ? formData.value.midlevel_vice_date 
+      : new Date(formData.value.midlevel_vice_date);
+    
+    if (!isNaN(assistantDate.getTime()) && !isNaN(viceDate.getTime()) && viceDate >= assistantDate) {
+      const diffTime = viceDate - assistantDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.midlevel_assistant_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有任中层副职时间，则使用当前时间减去任中层助理层级时间
+  if (formData.value.midlevel_assistant_date) {
+    const assistantDate = formData.value.midlevel_assistant_date instanceof Date 
+      ? formData.value.midlevel_assistant_date 
+      : new Date(formData.value.midlevel_assistant_date);
+      
+    if (!isNaN(assistantDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - assistantDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.midlevel_assistant_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.midlevel_assistant_tenure = "";
+}
+
+// 计算任中层副职年限
+function calculateMidlevelViceTenure() {
+  // 如果有任中层正职时间，则用任中层正职时间减去任中层副职时间
+  if (formData.value.midlevel_chief_date && formData.value.midlevel_vice_date) {
+    const viceDate = formData.value.midlevel_vice_date instanceof Date 
+      ? formData.value.midlevel_vice_date 
+      : new Date(formData.value.midlevel_vice_date);
+      
+    const chiefDate = formData.value.midlevel_chief_date instanceof Date 
+      ? formData.value.midlevel_chief_date 
+      : new Date(formData.value.midlevel_chief_date);
+    
+    if (!isNaN(viceDate.getTime()) && !isNaN(chiefDate.getTime()) && chiefDate >= viceDate) {
+      const diffTime = chiefDate - viceDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.midlevel_vice_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有任中层正职时间，则使用当前时间减去任中层副职时间
+  if (formData.value.midlevel_vice_date) {
+    const viceDate = formData.value.midlevel_vice_date instanceof Date 
+      ? formData.value.midlevel_vice_date 
+      : new Date(formData.value.midlevel_vice_date);
+      
+    if (!isNaN(viceDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - viceDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.midlevel_vice_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.midlevel_vice_tenure = "";
+}
+
+// 计算任中层正职年限
+function calculateMidlevelChiefTenure() {
+  // 直接使用当前时间减去任中层正职时间
+  if (formData.value.midlevel_chief_date) {
+    const chiefDate = formData.value.midlevel_chief_date instanceof Date 
+      ? formData.value.midlevel_chief_date 
+      : new Date(formData.value.midlevel_chief_date);
+      
+    if (!isNaN(chiefDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - chiefDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.midlevel_chief_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.midlevel_chief_tenure = "";
+}
+
+// 计算同部门任职年限
+function calculateSameDepartmentTenure() {
+  // 使用当前时间减去同部门任职时间
+  if (formData.value.same_department_date) {
+    const sameDepartmentDate = formData.value.same_department_date instanceof Date 
+      ? formData.value.same_department_date 
+      : new Date(formData.value.same_department_date);
+      
+    if (!isNaN(sameDepartmentDate.getTime())) {
+      const today = new Date();
+      const diffTime = today - sameDepartmentDate;
+      const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+      const diffDays = Math.floor((diffTime % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+      const diffMonths = Math.floor(diffDays / 30);
+      
+      formData.value.same_department_tenure = `${diffYears}年${diffMonths}月`;
+      return;
+    }
+  }
+  
+  // 如果没有足够的信息计算，则清空年限
+  formData.value.same_department_tenure = "";
 }
 </script>
 

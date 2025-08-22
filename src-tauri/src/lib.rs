@@ -94,15 +94,15 @@ fn export_grassroots_cadre_info_to_excel(
                         "grassroots_vice_position_date" => cadre.grassroots_vice_position_date.clone().unwrap_or_default(),
                         "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.clone().unwrap_or_default(),
                         "grassroots_chief_position_date" => cadre.grassroots_chief_position_date.clone().unwrap_or_default(),
-                        "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.unwrap_or(0.0).to_string(),
+                        "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.clone().unwrap_or_default(),
                         "midlevel_assistant_date" => cadre.midlevel_assistant_date.clone().unwrap_or_default(),
-                        "midlevel_assistant_tenure" => cadre.midlevel_assistant_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_assistant_tenure" => cadre.midlevel_assistant_tenure.clone().unwrap_or_default(),
                         "midlevel_vice_date" => cadre.midlevel_vice_date.clone().unwrap_or_default(),
-                        "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.clone().unwrap_or_default(),
                         "midlevel_chief_date" => cadre.midlevel_chief_date.clone().unwrap_or_default(),
-                        "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.clone().unwrap_or_default(),
                         "same_department_date" => cadre.same_department_date.clone().unwrap_or_default(),
-                        "same_department_tenure" => cadre.same_department_tenure.unwrap_or(0.0).to_string(),
+                        "same_department_tenure" => cadre.same_department_tenure.clone().unwrap_or_default(),
                         _ => String::new(),
                     };
                     row_data.push(value);
@@ -207,15 +207,15 @@ fn export_midlevel_cadre_info_to_excel(
                         "grassroots_vice_position_date" => cadre.grassroots_vice_position_date.clone().unwrap_or_default(),
                         "grassroots_vice_tenure" => cadre.grassroots_vice_tenure.clone().unwrap_or_default(),
                         "grassroots_chief_position_date" => cadre.grassroots_chief_position_date.clone().unwrap_or_default(),
-                        "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.unwrap_or(0.0).to_string(),
+                        "grassroots_chief_tenure" => cadre.grassroots_chief_tenure.clone().unwrap_or_default(),
                         "midlevel_assistant_date" => cadre.midlevel_assistant_date.clone().unwrap_or_default(),
-                        "midlevel_assistant_tenure" => cadre.midlevel_assistant_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_assistant_tenure" => cadre.midlevel_assistant_tenure.clone().unwrap_or_default(),
                         "midlevel_vice_date" => cadre.midlevel_vice_date.clone().unwrap_or_default(),
-                        "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_vice_tenure" => cadre.midlevel_vice_tenure.clone().unwrap_or_default(),
                         "midlevel_chief_date" => cadre.midlevel_chief_date.clone().unwrap_or_default(),
-                        "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.unwrap_or(0.0).to_string(),
+                        "midlevel_chief_tenure" => cadre.midlevel_chief_tenure.clone().unwrap_or_default(),
                         "same_department_date" => cadre.same_department_date.clone().unwrap_or_default(),
-                        "same_department_tenure" => cadre.same_department_tenure.unwrap_or(0.0).to_string(),
+                        "same_department_tenure" => cadre.same_department_tenure.clone().unwrap_or_default(),
                         _ => String::new(),
                     };
                     row_data.push(value);
@@ -303,6 +303,8 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
                         Err(e) => {
                             let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
                             eprintln!("DEBUG: {}", error_msg);
+                            // 添加更详细的错误信息
+                            eprintln!("DEBUG: 具体错误类型: {:?}", e);
                             error_details.push(error_msg);
                         }
                     }
@@ -327,6 +329,8 @@ fn import_cadre_info_from_excel(db: State<'_, Mutex<Database>>, file_path: Strin
                         Err(e) => {
                             let error_msg = format!("第{}行数据插入数据库失败: {}", row_index + 1, e);
                             eprintln!("DEBUG: {}", error_msg);
+                            // 添加更详细的错误信息
+                            eprintln!("DEBUG: 具体错误类型: {:?}", e);
                             error_details.push(error_msg);
                         }
                     }
@@ -477,15 +481,15 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
     let grassroots_vice_position_date_raw = get_cell_value(29); // 任基层副职时间
     let _grassroots_vice_tenure_str = get_cell_value(30); // 任基层副职年限
     let grassroots_chief_position_date_raw = get_cell_value(31); // 任基层正职时间
-    let grassroots_chief_tenure_str = get_cell_value(32); // 任基层正职年限
+    let _grassroots_chief_tenure_str = get_cell_value(32); // 任基层正职年限
     let midlevel_assistant_date_raw = get_cell_value(33); // 任中层助理时间
-    let midlevel_assistant_tenure_str = get_cell_value(34); // 任中层助理年限
+    let _midlevel_assistant_tenure_str = get_cell_value(34); // 任中层助理年限
     let midlevel_vice_date_raw = get_cell_value(35); // 任中层副职时间
-    let midlevel_vice_tenure_str = get_cell_value(36); // 任中层副职年限
+    let _midlevel_vice_tenure_str = get_cell_value(36); // 任中层副职年限 (不再使用，改为下划线前缀)
     let midlevel_chief_date_raw = get_cell_value(37); // 任中层正职时间
-    let midlevel_chief_tenure_str = get_cell_value(38); // 任中层正职年限
+    let _midlevel_chief_tenure_str = get_cell_value(38); // 任中层正职年限 (不再使用，改为下划线前缀)
     let same_department_date_raw = get_cell_value(39); // 同部门任职时间
-    let same_department_tenure_str = get_cell_value(40); // 同部门任职年限
+    let _same_department_tenure_str = get_cell_value(40); // 同部门任职年限 (不再使用，改为下划线前缀)
     let remarks = get_cell_value(41); // 备注
     
     // 对日期字段应用标准化函数
@@ -539,34 +543,153 @@ fn parse_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<Grassroot
         }
     };
     
-    let grassroots_chief_tenure = if !grassroots_chief_tenure_str.is_empty() {
-        grassroots_chief_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任基层正职年限
+    let grassroots_chief_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层助理层级时间，则用任中层助理层级时间减去任基层正职时间
+        if !midlevel_assistant_date_raw.is_empty() && !grassroots_chief_position_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                    if assistant_date >= chief_date {
+                        let diff_days = (assistant_date - chief_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层助理层级时间，则使用当前时间减去任基层正职时间
+        else if !grassroots_chief_position_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - chief_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
-    let midlevel_assistant_tenure = if !midlevel_assistant_tenure_str.is_empty() {
-        midlevel_assistant_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层助理年限
+    let midlevel_assistant_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层副职时间，则用任中层副职时间减去任中层助理层级时间
+        if !midlevel_vice_date_raw.is_empty() && !midlevel_assistant_date_raw.is_empty() {
+            if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                    if vice_date >= assistant_date {
+                        let diff_days = (vice_date - assistant_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层副职时间，则使用当前时间减去任中层助理层级时间
+        else if !midlevel_assistant_date_raw.is_empty() {
+            if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - assistant_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
-    let midlevel_vice_tenure = if !midlevel_vice_tenure_str.is_empty() {
-        midlevel_vice_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层副职年限
+    let midlevel_vice_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层正职时间，则用任中层正职时间减去任中层副职时间
+        if !midlevel_chief_date_raw.is_empty() && !midlevel_vice_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_chief_date_raw), "%Y-%m-%d") {
+                    if chief_date >= vice_date {
+                        let diff_days = (chief_date - vice_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层正职时间，则使用当前时间减去任中层副职时间
+        else if !midlevel_vice_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - vice_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
-    let midlevel_chief_tenure = if !midlevel_chief_tenure_str.is_empty() {
-        midlevel_chief_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层正职年限
+    let midlevel_chief_tenure = {
+        let mut tenure = String::new();
+        
+        // 直接使用当前时间减去任中层正职时间
+        if !midlevel_chief_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_chief_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - chief_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
-    let same_department_tenure = if !same_department_tenure_str.is_empty() {
-        same_department_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算同部门任职年限
+    let same_department_tenure = {
+        let mut tenure = String::new();
+        
+        // 使用当前时间减去同部门任职时间
+        if !same_department_date_raw.is_empty() {
+            if let Ok(same_department_date) = NaiveDate::parse_from_str(&normalize_date_format(&same_department_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - same_department_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
     // 自动计算字段
@@ -756,15 +879,15 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
     let grassroots_vice_position_date_raw = get_cell_value(28); // 任基层副职时间
     let _grassroots_vice_tenure_str = get_cell_value(29); // 任基层副职年限
     let grassroots_chief_position_date_raw = get_cell_value(30); // 任基层正职时间
-    let grassroots_chief_tenure_str = get_cell_value(31); // 任基层正职年限
+    let _grassroots_chief_tenure_str = get_cell_value(31); // 任基层正职年限
     let midlevel_assistant_date_raw = get_cell_value(32); // 任中层助理时间
-    let midlevel_assistant_tenure_str = get_cell_value(33); // 任中层助理年限
+    let _midlevel_assistant_tenure_str = get_cell_value(33); // 任中层助理年限
     let midlevel_vice_date_raw = get_cell_value(34); // 任中层副职时间
-    let midlevel_vice_tenure_str = get_cell_value(35); // 任中层副职年限
+    let _midlevel_vice_tenure_str = get_cell_value(35); // 任中层副职年限 (不再使用，改为下划线前缀)
     let midlevel_chief_date_raw = get_cell_value(36); // 任中层正职时间
-    let midlevel_chief_tenure_str = get_cell_value(37); // 任中层正职年限
+    let _midlevel_chief_tenure_str = get_cell_value(37); // 任中层正职年限 (不再使用，改为下划线前缀)
     let same_department_date_raw = get_cell_value(38); // 同部门任职时间
-    let same_department_tenure_str = get_cell_value(39); // 同部门任职年限
+    let _same_department_tenure_str = get_cell_value(39); // 同部门任职年限 (不再使用，改为下划线前缀)
     let remarks = get_cell_value(40); // 备注
     
     // 对日期字段应用标准化函数
@@ -818,34 +941,153 @@ fn parse_midlevel_cadre_info_from_row(row: &[Data], row_index: usize) -> Result<
         }
     };
     
-    let grassroots_chief_tenure = if !grassroots_chief_tenure_str.is_empty() {
-        grassroots_chief_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任基层正职年限
+    let grassroots_chief_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层助理层级时间，则用任中层助理层级时间减去任基层正职时间
+        if !midlevel_assistant_date_raw.is_empty() && !grassroots_chief_position_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                    if assistant_date >= chief_date {
+                        let diff_days = (assistant_date - chief_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层助理层级时间，则使用当前时间减去任基层正职时间
+        else if !grassroots_chief_position_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&grassroots_chief_position_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - chief_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
-    let midlevel_assistant_tenure = if !midlevel_assistant_tenure_str.is_empty() {
-        midlevel_assistant_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层助理年限
+    let midlevel_assistant_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层副职时间，则用任中层副职时间减去任中层助理层级时间
+        if !midlevel_vice_date_raw.is_empty() && !midlevel_assistant_date_raw.is_empty() {
+            if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                    if vice_date >= assistant_date {
+                        let diff_days = (vice_date - assistant_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层副职时间，则使用当前时间减去任中层助理层级时间
+        else if !midlevel_assistant_date_raw.is_empty() {
+            if let Ok(assistant_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_assistant_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - assistant_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if !tenure.is_empty() {
+            Some(tenure)
+        } else {
+            None
+        }
     };
     
-    let midlevel_vice_tenure = if !midlevel_vice_tenure_str.is_empty() {
-        midlevel_vice_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层副职年限
+    let midlevel_vice_tenure = {
+        let mut tenure = String::new();
+        
+        // 如果有任中层正职时间，则用任中层正职时间减去任中层副职时间
+        if !midlevel_chief_date_raw.is_empty() && !midlevel_vice_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_chief_date_raw), "%Y-%m-%d") {
+                    if chief_date >= vice_date {
+                        let diff_days = (chief_date - vice_date).num_days();
+                        let diff_years = diff_days / 365;
+                        let diff_months = (diff_days % 365) / 30;
+                        tenure = format!("{}年{}月", diff_years, diff_months);
+                    }
+                }
+            }
+        } 
+        // 如果没有任中层正职时间，则使用当前时间减去任中层副职时间
+        else if !midlevel_vice_date_raw.is_empty() {
+            if let Ok(vice_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_vice_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - vice_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
-    let midlevel_chief_tenure = if !midlevel_chief_tenure_str.is_empty() {
-        midlevel_chief_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算任中层正职年限
+    let midlevel_chief_tenure = {
+        let mut tenure = String::new();
+        
+        // 直接使用当前时间减去任中层正职时间
+        if !midlevel_chief_date_raw.is_empty() {
+            if let Ok(chief_date) = NaiveDate::parse_from_str(&normalize_date_format(&midlevel_chief_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - chief_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
-    let same_department_tenure = if !same_department_tenure_str.is_empty() {
-        same_department_tenure_str.parse::<f32>().ok()
-    } else {
-        None
+    // 自动计算同部门任职年限
+    let same_department_tenure = {
+        let mut tenure = String::new();
+        
+        // 使用当前时间减去同部门任职时间
+        if !same_department_date_raw.is_empty() {
+            if let Ok(same_department_date) = NaiveDate::parse_from_str(&normalize_date_format(&same_department_date_raw), "%Y-%m-%d") {
+                let today = Local::now().naive_local().date();
+                let diff_days = (today - same_department_date).num_days();
+                let diff_years = diff_days / 365;
+                let diff_months = (diff_days % 365) / 30;
+                tenure = format!("{}年{}月", diff_years, diff_months);
+            }
+        }
+        
+        if tenure.is_empty() {
+            None
+        } else {
+            Some(tenure)
+        }
     };
     
     // 自动计算字段
@@ -994,7 +1236,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "毕业院校系及专业2", "政治面貌", "入党时间", "联系电话", 
                           "任基层副职时间", "任基层副职年限", "任基层正职时间", "任基层正职年限", 
                           "任中层助理时间", "任中层助理年限", "任中层副职时间", "任中层副职年限", 
-                          "任中层正职时间", "任中层正职年限", "同部门任职年限", "备注"])?;
+                          "任中层正职时间", "任中层正职年限", "同部门任职时间", "同部门任职年限", "备注"])?;
             
             // 写入数据规范说明行
             sheet_writer.append_row(row!["", "男/女", "部门名称", "职务名称", "职务名称",
@@ -1003,9 +1245,9 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "18位身份证号", "YYYY-MM-DD", "数字", "地区", 
                           "地区", "民族名称", "职务名称", "学历名称", "学历名称", "学校专业", 
                           "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", "手机号码", 
+                          "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "文本(x年x月)", 
                           "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "数字", 
-                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
-                          "YYYY-MM-DD", "数字", "数字", "备注信息"])?;
+                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", "备注信息"])?;
             
             // 写入示例行
             sheet_writer.append_row(row!["张三", "男", "人力资源部", "部长", "副主任",
@@ -1017,7 +1259,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "2015-06-15", "13800138000", 
                           "2018-05-10", "2年3月", "2020-01-15", "1年2月", 
                           "2019-03-20", "1年8月", "2021-06-01", "0年5月", 
-                          "2022-01-10", "0年3月", "2年0月", "优秀员工"])?;
+                          "2022-01-10", "0年3月", "2022-01-10", "2年0月", "优秀员工"])?;
         } else {
             // 基层管理人员模板 (包含科室字段和自动计算字段)
             sheet_writer.append_row(row!["姓名", "性别", "部门", "科室", "职务1", "职务2", 
@@ -1028,7 +1270,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "毕业院校系及专业2", "政治面貌", "入党时间", "联系电话", 
                           "任基层副职时间", "任基层副职年限", "任基层正职时间", "任基层正职年限", 
                           "任中层助理时间", "任中层助理年限", "任中层副职时间", "任中层副职年限", 
-                          "任中层正职时间", "任中层正职年限", "同部门任职年限", "备注"])?;
+                          "任中层正职时间", "任中层正职年限", "同部门任职时间", "同部门任职年限", "备注"])?;
             
             // 写入数据规范说明行
             sheet_writer.append_row(row!["", "男/女", "部门名称", "科室名称", "职务名称", "职务名称",
@@ -1037,9 +1279,9 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "18位身份证号", "YYYY-MM-DD", "数字", "地区", 
                           "地区", "民族名称", "职务名称", "学历名称", "学历名称", "学校专业", 
                           "学历名称", "学校专业", "政治面貌选项", "YYYY-MM-DD", "手机号码", 
+                          "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "文本(x年x月)", 
                           "YYYY-MM-DD", "文本(x年x月)", "YYYY-MM-DD", "数字", 
-                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", 
-                          "YYYY-MM-DD", "数字", "数字", "备注信息"])?;
+                          "YYYY-MM-DD", "数字", "YYYY-MM-DD", "数字", "备注信息"])?;
             
             // 写入示例行
             sheet_writer.append_row(row!["张三", "男", "人力资源部", "招聘科", "部长", "副主任",
@@ -1051,7 +1293,7 @@ fn generate_import_template(is_midlevel: bool) -> Result<Vec<u8>, String> {
                           "2015-06-15", "13800138000", 
                           "2018-05-10", "2年3月", "2020-01-15", "1年2月", 
                           "2019-03-20", "1年8月", "2021-06-01", "0年5月", 
-                          "2022-01-10", "0年3月", "2年0月", "优秀员工"])?;
+                          "2022-01-10", "0年3月", "2022-01-10", "2年0月", "优秀员工"])?;
         }
         
         // 写入政治面貌选项说明

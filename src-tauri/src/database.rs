@@ -43,15 +43,15 @@ pub struct GrassrootsCadreInfo {
     pub grassroots_vice_position_date: Option<String>, // 任基层副职时间
     pub grassroots_vice_tenure: Option<String>, // 任基层副职年限 (改为文本类型)
     pub grassroots_chief_position_date: Option<String>, // 任基层正职时间
-    pub grassroots_chief_tenure: Option<f32>, // 任基层正职年限
+    pub grassroots_chief_tenure: Option<String>, // 任基层正职年限 (改为文本类型)
     pub midlevel_assistant_date: Option<String>, // 任中层助理层级时间
-    pub midlevel_assistant_tenure: Option<f32>, // 任中层助理年限
+    pub midlevel_assistant_tenure: Option<String>, // 任中层助理年限
     pub midlevel_vice_date: Option<String>, // 任中层副职时间
-    pub midlevel_vice_tenure: Option<f32>, // 任中层副职年限
+    pub midlevel_vice_tenure: Option<String>, // 任中层副职年限
     pub midlevel_chief_date: Option<String>, // 任中层正职时间
-    pub midlevel_chief_tenure: Option<f32>, // 任中层正职年限
+    pub midlevel_chief_tenure: Option<String>, // 任中层正职年限
     pub same_department_date: Option<String>, // 同部门任职时间
-    pub same_department_tenure: Option<f32>, // 同部门任职年限
+    pub same_department_tenure: Option<String>, // 同部门任职年限
     pub remarks: Option<String>,
     pub major: Option<String>,
     pub contact_date: Option<String>,
@@ -95,15 +95,15 @@ pub struct MidLevelCadreInfo {
     pub grassroots_vice_position_date: Option<String>, // 任基层副职时间
     pub grassroots_vice_tenure: Option<String>, // 任基层副职年限 (改为文本类型)
     pub grassroots_chief_position_date: Option<String>, // 任基层正职时间
-    pub grassroots_chief_tenure: Option<f32>, // 任基层正职年限
+    pub grassroots_chief_tenure: Option<String>, // 任基层正职年限 (改为文本类型)
     pub midlevel_assistant_date: Option<String>, // 任中层助理层级时间
-    pub midlevel_assistant_tenure: Option<f32>, // 任中层助理年限
+    pub midlevel_assistant_tenure: Option<String>, // 任中层助理年限
     pub midlevel_vice_date: Option<String>, // 任中层副职时间
-    pub midlevel_vice_tenure: Option<f32>, // 任中层副职年限
+    pub midlevel_vice_tenure: Option<String>, // 任中层副职年限
     pub midlevel_chief_date: Option<String>, // 任中层正职时间
-    pub midlevel_chief_tenure: Option<f32>, // 任中层正职年限
+    pub midlevel_chief_tenure: Option<String>, // 任中层正职年限
     pub same_department_date: Option<String>, // 同部门任职时间
-    pub same_department_tenure: Option<f32>, // 同部门任职年限
+    pub same_department_tenure: Option<String>, // 同部门任职年限
     pub remarks: Option<String>,
     pub major: Option<String>,
     pub contact_date: Option<String>,
@@ -167,15 +167,15 @@ impl Database {
                 grassroots_vice_position_date TEXT,
                 grassroots_vice_tenure TEXT,
                 grassroots_chief_position_date TEXT,
-                grassroots_chief_tenure REAL,
+                grassroots_chief_tenure TEXT,
                 midlevel_assistant_date TEXT,
-                midlevel_assistant_tenure REAL,
+                midlevel_assistant_tenure TEXT,
                 midlevel_vice_date TEXT,
-                midlevel_vice_tenure REAL,
+                midlevel_vice_tenure TEXT,
                 midlevel_chief_date TEXT,
-                midlevel_chief_tenure REAL,
+                midlevel_chief_tenure TEXT,
                 same_department_date TEXT,
-                same_department_tenure REAL,
+                same_department_tenure TEXT,
                 remarks TEXT,
                 major TEXT,
                 contact_date TEXT,
@@ -220,15 +220,15 @@ impl Database {
                 grassroots_vice_position_date TEXT,
                 grassroots_vice_tenure TEXT,
                 grassroots_chief_position_date TEXT,
-                grassroots_chief_tenure REAL,
+                grassroots_chief_tenure TEXT,
                 midlevel_assistant_date TEXT,
-                midlevel_assistant_tenure REAL,
+                midlevel_assistant_tenure TEXT,
                 midlevel_vice_date TEXT,
-                midlevel_vice_tenure REAL,
+                midlevel_vice_tenure TEXT,
                 midlevel_chief_date TEXT,
-                midlevel_chief_tenure REAL,
+                midlevel_chief_tenure TEXT,
                 same_department_date TEXT,
-                same_department_tenure REAL,
+                same_department_tenure TEXT,
                 remarks TEXT,
                 major TEXT,
                 contact_date TEXT,
@@ -249,29 +249,29 @@ impl Database {
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_vice_position_date TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_chief_position_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN grassroots_chief_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_assistant_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_assistant_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_assistant_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_vice_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_vice_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_chief_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN midlevel_chief_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN same_department_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN same_department_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE grassroots_cadres ADD COLUMN same_department_tenure TEXT", []);
         
         // Handle database migration - add new columns for midlevel cadre information
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_vice_position_date TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_chief_position_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN grassroots_chief_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_assistant_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_assistant_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_assistant_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_vice_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_vice_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_vice_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_chief_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_chief_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN midlevel_chief_tenure TEXT", []);
         let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN same_department_date TEXT", []);
-        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN same_department_tenure REAL", []);
+        let _ = conn.execute("ALTER TABLE midlevel_cadres ADD COLUMN same_department_tenure TEXT", []);
         
         Ok(Database { conn })
     }
@@ -279,7 +279,28 @@ impl Database {
     // ==================== Grassroots Cadres Methods ====================
     
     pub fn add_grassroots_cadre(&self, cadre: &GrassrootsCadreInfo) -> Result<usize> {
-        self.conn.execute(
+        // 添加详细的调试信息
+        eprintln!("DEBUG: Adding grassroots cadre - name: {}", cadre.name);
+        eprintln!("DEBUG: Field count in INSERT statement: 46");
+        eprintln!("DEBUG: Parameter count should be: 46");
+        
+        // 打印一些关键字段的值
+        eprintln!("DEBUG: cadre.serial_number: {:?}", cadre.serial_number);
+        eprintln!("DEBUG: cadre.name: {}", cadre.name);
+        eprintln!("DEBUG: cadre.gender: {:?}", cadre.gender);
+        eprintln!("DEBUG: cadre.department: {:?}", cadre.department);
+        eprintln!("DEBUG: cadre.section: {:?}", cadre.section);
+        eprintln!("DEBUG: cadre.position1: {:?}", cadre.position1);
+        eprintln!("DEBUG: cadre.position2: {:?}", cadre.position2);
+        eprintln!("DEBUG: cadre.company_entry_date: {:?}", cadre.company_entry_date);
+        eprintln!("DEBUG: cadre.same_department_date: {:?}", cadre.same_department_date);
+        eprintln!("DEBUG: cadre.same_department_tenure: {:?}", cadre.same_department_tenure);
+        eprintln!("DEBUG: cadre.remarks: {:?}", cadre.remarks);
+        eprintln!("DEBUG: cadre.major: {:?}", cadre.major);
+        eprintln!("DEBUG: cadre.contact_date: {:?}", cadre.contact_date);
+        eprintln!("DEBUG: cadre.special_date: {:?}", cadre.special_date);
+        
+        let result = self.conn.execute(
             "INSERT INTO grassroots_cadres (
                 serial_number, name, gender, department, section, position1, position2,
                 company_entry_date, company_tenure, work_start_date, work_tenure,
@@ -309,7 +330,18 @@ impl Database {
                 cadre.midlevel_vice_tenure, cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
                 cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
             ],
-        )
+        );
+        
+        match result {
+            Ok(rows_affected) => {
+                eprintln!("DEBUG: Grassroots cadre added successfully, rows affected: {}", rows_affected);
+                Ok(rows_affected)
+            },
+            Err(e) => {
+                eprintln!("DEBUG: Error adding grassroots cadre: {}", e);
+                Err(e)
+            },
+        }
     }
     
     pub fn get_all_grassroots_cadres(&self) -> Result<Vec<GrassrootsCadreInfo>> {
@@ -366,7 +398,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(33)?,
                 grassroots_chief_tenure: row.get(34)?,
                 midlevel_assistant_date: row.get(35)?,
-                midlevel_assistant_tenure: row.get(36)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(36) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(36) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(37)?,
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
@@ -400,7 +444,7 @@ impl Database {
                     grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                     midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                     midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                    same_department_tenure, remarks, major, contact_date, special_date
+                    same_department_date, same_department_tenure, remarks, major, contact_date, special_date
              FROM grassroots_cadres WHERE id = ?1"
         )?;
         
@@ -442,7 +486,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(33)?,
                 grassroots_chief_tenure: row.get(34)?,
                 midlevel_assistant_date: row.get(35)?,
-                midlevel_assistant_tenure: row.get(36)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(36) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(36) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(37)?,
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
@@ -509,7 +565,27 @@ impl Database {
     // ==================== Mid-Level Cadres Methods ====================
     
     pub fn add_midlevel_cadre(&self, cadre: &MidLevelCadreInfo) -> Result<usize> {
-        self.conn.execute(
+        // 添加详细的调试信息
+        eprintln!("DEBUG: Adding midlevel cadre - name: {}", cadre.name);
+        eprintln!("DEBUG: Field count in INSERT statement: 45");
+        eprintln!("DEBUG: Parameter count should be: 45");
+        
+        // 打印一些关键字段的值
+        eprintln!("DEBUG: cadre.serial_number: {:?}", cadre.serial_number);
+        eprintln!("DEBUG: cadre.name: {}", cadre.name);
+        eprintln!("DEBUG: cadre.gender: {:?}", cadre.gender);
+        eprintln!("DEBUG: cadre.department: {:?}", cadre.department);
+        eprintln!("DEBUG: cadre.position1: {:?}", cadre.position1);
+        eprintln!("DEBUG: cadre.position2: {:?}", cadre.position2);
+        eprintln!("DEBUG: cadre.company_entry_date: {:?}", cadre.company_entry_date);
+        eprintln!("DEBUG: cadre.same_department_date: {:?}", cadre.same_department_date);
+        eprintln!("DEBUG: cadre.same_department_tenure: {:?}", cadre.same_department_tenure);
+        eprintln!("DEBUG: cadre.remarks: {:?}", cadre.remarks);
+        eprintln!("DEBUG: cadre.major: {:?}", cadre.major);
+        eprintln!("DEBUG: cadre.contact_date: {:?}", cadre.contact_date);
+        eprintln!("DEBUG: cadre.special_date: {:?}", cadre.special_date);
+        
+        let result = self.conn.execute(
             "INSERT INTO midlevel_cadres (
                 serial_number, name, gender, department, position1, position2,
                 company_entry_date, company_tenure, work_start_date, work_tenure,
@@ -524,7 +600,7 @@ impl Database {
                 same_department_date, same_department_tenure, remarks, major, contact_date, special_date
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15,
                       ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29,
-                      ?30, ?31, ?32, ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43, ?44)",
+                      ?30, ?31, ?32, ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43, ?44, ?45)",
             params![
                 cadre.serial_number, &cadre.name, cadre.gender, cadre.department,
                 cadre.position1, cadre.position2, cadre.company_entry_date, cadre.company_tenure,
@@ -539,7 +615,18 @@ impl Database {
                 cadre.midlevel_vice_tenure, cadre.midlevel_chief_date, cadre.midlevel_chief_tenure,
                 cadre.same_department_date, cadre.same_department_tenure, cadre.remarks, cadre.major, cadre.contact_date, cadre.special_date
             ],
-        )
+        );
+        
+        match result {
+            Ok(rows_affected) => {
+                eprintln!("DEBUG: Midlevel cadre added successfully, rows affected: {}", rows_affected);
+                Ok(rows_affected)
+            },
+            Err(e) => {
+                eprintln!("DEBUG: Error adding midlevel cadre: {}", e);
+                Err(e)
+            },
+        }
     }
     
     pub fn get_all_midlevel_cadres(&self) -> Result<Vec<MidLevelCadreInfo>> {
@@ -595,7 +682,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(32)?,
                 grassroots_chief_tenure: row.get(33)?,
                 midlevel_assistant_date: row.get(34)?,
-                midlevel_assistant_tenure: row.get(35)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(35) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(35) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(36)?,
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
@@ -670,7 +769,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(32)?,
                 grassroots_chief_tenure: row.get(33)?,
                 midlevel_assistant_date: row.get(34)?,
-                midlevel_assistant_tenure: row.get(35)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(35) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(35) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(36)?,
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
@@ -881,7 +992,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(33)?,
                 grassroots_chief_tenure: row.get(34)?,
                 midlevel_assistant_date: row.get(35)?,
-                midlevel_assistant_tenure: row.get(36)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(36) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(36) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(37)?,
                 midlevel_vice_tenure: row.get(38)?,
                 midlevel_chief_date: row.get(39)?,
@@ -1006,7 +1129,19 @@ impl Database {
                 grassroots_chief_position_date: row.get(32)?,
                 grassroots_chief_tenure: row.get(33)?,
                 midlevel_assistant_date: row.get(34)?,
-                midlevel_assistant_tenure: row.get(35)?,
+                midlevel_assistant_tenure: {
+                    // Handle both TEXT and REAL types for backward compatibility
+                    match row.get::<_, Option<String>>(35) {
+                        Ok(val) => val,
+                        Err(_) => {
+                            // If it's stored as REAL, convert it to String
+                            match row.get::<_, Option<f32>>(35) {
+                                Ok(val) => val.map(|v| v.to_string()),
+                                Err(_) => None
+                            }
+                        }
+                    }
+                },
                 midlevel_vice_date: row.get(36)?,
                 midlevel_vice_tenure: row.get(37)?,
                 midlevel_chief_date: row.get(38)?,
