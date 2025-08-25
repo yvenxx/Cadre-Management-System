@@ -845,6 +845,18 @@ impl Database {
         self.conn.execute("DELETE FROM midlevel_cadres WHERE id = ?1", [id])
     }
     
+    // 清空所有基层干部数据
+    pub fn clear_grassroots_cadres(&self) -> Result<usize> {
+        let result = self.conn.execute("DELETE FROM grassroots_cadres", []);
+        result
+    }
+    
+    // 清空所有中层干部数据
+    pub fn clear_midlevel_cadres(&self) -> Result<usize> {
+        let result = self.conn.execute("DELETE FROM midlevel_cadres", []);
+        result
+    }
+    
     // ==================== Common Methods ====================
     
     pub fn get_distinct_field_values(&self, table_name: &str, field_name: &str) -> Result<Vec<String>> {

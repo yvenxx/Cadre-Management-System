@@ -1868,13 +1868,8 @@ async function deleteAllCadres() {
   }
   
   try {
-    // 获取所有干部的ID
-    const allCadres = await invoke("get_all_midlevel_cadre_info");
-    
-    // 逐个删除所有干部
-    for (const cadre of allCadres) {
-      await invoke("delete_midlevel_cadre_info", { id: cadre.id });
-    }
+    // 调用后端清空所有数据的函数
+    await invoke("clear_all_midlevel_cadre_info");
     
     // 关闭确认对话框
     showDeleteConfirmDialog.value = false;

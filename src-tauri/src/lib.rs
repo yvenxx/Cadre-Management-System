@@ -1533,6 +1533,46 @@ fn delete_midlevel_cadre_info(db: State<'_, Mutex<Database>>, id: i32) -> Result
     }
 }
 
+// 清空所有基层干部数据
+#[tauri::command]
+fn clear_all_grassroots_cadre_info(db: State<'_, Mutex<Database>>) -> Result<(), String> {
+    match db.lock() {
+        Ok(db_guard) => {
+            match db_guard.clear_grassroots_cadres() {
+                Ok(_result) => {
+                    Ok(())
+                },
+                Err(e) => {
+                    Err(format!("清空基层干部信息失败: {}", e))
+                }
+            }
+        },
+        Err(e) => {
+            Err(format!("获取数据库锁失败: {}", e))
+        }
+    }
+}
+
+// 清空所有中层干部数据
+#[tauri::command]
+fn clear_all_midlevel_cadre_info(db: State<'_, Mutex<Database>>) -> Result<(), String> {
+    match db.lock() {
+        Ok(db_guard) => {
+            match db_guard.clear_midlevel_cadres() {
+                Ok(_result) => {
+                    Ok(())
+                },
+                Err(e) => {
+                    Err(format!("清空中层干部信息失败: {}", e))
+                }
+            }
+        },
+        Err(e) => {
+            Err(format!("获取数据库锁失败: {}", e))
+        }
+    }
+}
+
 #[tauri::command]
 fn get_distinct_field_values_for_table(db: State<'_, Mutex<Database>>, table_name: String, field_name: String) -> Result<Vec<String>, String> {
     match db.lock() {
@@ -1581,12 +1621,14 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             get_grassroots_cadre_info_by_id,
             update_grassroots_cadre_info,
             delete_grassroots_cadre_info,
+            clear_all_grassroots_cadre_info, // 新增的清空基层干部数据命令
             // Mid-level cadres commands
             add_midlevel_cadre_info,
             get_all_midlevel_cadre_info,
             get_midlevel_cadre_info_by_id,
             update_midlevel_cadre_info,
             delete_midlevel_cadre_info,
+            clear_all_midlevel_cadre_info, // 新增的清空中层干部数据命令
             // Common commands
             get_distinct_field_values_for_table,
             // 新增的干部名册导出命令
