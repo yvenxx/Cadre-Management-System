@@ -419,8 +419,8 @@ impl Database {
                 same_department_tenure: row.get(42)?,
                 remarks: row.get(43)?,
                 major: row.get(44)?,
-                contact_date: row.get(45)?,
-                special_date: row.get(46)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         
@@ -507,8 +507,8 @@ impl Database {
                 same_department_tenure: row.get(42)?,
                 remarks: row.get(43)?,
                 major: row.get(44)?,
-                contact_date: row.get(45)?,
-                special_date: row.get(46)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         
@@ -1013,8 +1013,8 @@ impl Database {
                 same_department_tenure: row.get(42)?,
                 remarks: row.get(43)?,
                 major: row.get(44)?,
-                contact_date: row.get(45)?,
-                special_date: row.get(46)?,
+                contact_date: row.get(44)?,
+                special_date: row.get(45)?,
             })
         })?;
         
@@ -1038,7 +1038,7 @@ impl Database {
                 grassroots_vice_tenure, grassroots_chief_position_date, grassroots_chief_tenure,
                 midlevel_assistant_date, midlevel_assistant_tenure, midlevel_vice_date,
                 midlevel_vice_tenure, midlevel_chief_date, midlevel_chief_tenure,
-                same_department_tenure, remarks, major, contact_date, special_date
+                same_department_date, same_department_tenure, remarks, major, contact_date, special_date
          FROM midlevel_cadres WHERE 1=1".to_string();
         
         let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
