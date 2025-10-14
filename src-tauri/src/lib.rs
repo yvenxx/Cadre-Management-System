@@ -1720,7 +1720,8 @@ fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: S
         let index_str = (index + 1).to_string();
         let name = cadre.name.clone();
         let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
-        let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
+        // 现任职务：由原来的“职务1”改为“职务2”
+        let position2 = cadre.position2.as_ref().unwrap_or(&"".to_string()).clone();
         let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
         let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
         let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
@@ -1744,7 +1745,7 @@ fn export_grassroots_cadre_roster(db: State<'_, Mutex<Database>>, output_path: S
             .map_err(|e| format!("写入姓名失败: {}", e))?;
         worksheet.write(&format!("C{}", current_row), gender)
             .map_err(|e| format!("写入性别失败: {}", e))?;
-        worksheet.write(&format!("D{}", current_row), position1)
+        worksheet.write(&format!("D{}", current_row), position2)
             .map_err(|e| format!("写入职务失败: {}", e))?;
         worksheet.write(&format!("E{}", current_row), birth_date)
             .map_err(|e| format!("写入出生日期失败: {}", e))?;
@@ -1866,7 +1867,8 @@ fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: Str
         let index_str = (index + 1).to_string();
         let name = cadre.name.clone();
         let gender = cadre.gender.as_ref().unwrap_or(&"".to_string()).clone();
-        let position1 = cadre.position1.as_ref().unwrap_or(&"".to_string()).clone();
+        // 现任职务：由原来的“职务1”改为“职务2”
+        let position2 = cadre.position2.as_ref().unwrap_or(&"".to_string()).clone();
         let birth_date = cadre.birth_date.as_ref().unwrap_or(&"".to_string()).clone();
         let ethnicity = cadre.ethnicity.as_ref().unwrap_or(&"".to_string()).clone();
         let native_place = cadre.native_place.as_ref().unwrap_or(&"".to_string()).clone();
@@ -1890,7 +1892,7 @@ fn export_midlevel_cadre_roster(db: State<'_, Mutex<Database>>, output_path: Str
             .map_err(|e| format!("写入姓名失败: {}", e))?;
         worksheet.write(&format!("C{}", current_row), gender)
             .map_err(|e| format!("写入性别失败: {}", e))?;
-        worksheet.write(&format!("D{}", current_row), position1)
+        worksheet.write(&format!("D{}", current_row), position2)
             .map_err(|e| format!("写入职务失败: {}", e))?;
         worksheet.write(&format!("E{}", current_row), birth_date)
             .map_err(|e| format!("写入出生日期失败: {}", e))?;
