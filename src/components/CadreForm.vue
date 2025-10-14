@@ -917,12 +917,11 @@ function calculateGrassrootsChiefTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.grassroots_chief_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.grassroots_chief_tenure = "";
     }
-  }
-  
-  // 如果没有任中层助理层级时间，则使用当前时间减去任基层正职时间
-  if (formData.value.grassroots_chief_position_date) {
+  } else if (formData.value.grassroots_chief_position_date) {
+    // 如果没有任中层助理层级时间，则使用当前时间减去任基层正职时间
     const chiefDate = formData.value.grassroots_chief_position_date instanceof Date 
       ? formData.value.grassroots_chief_position_date 
       : new Date(formData.value.grassroots_chief_position_date);
@@ -935,12 +934,16 @@ function calculateGrassrootsChiefTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.grassroots_chief_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.grassroots_chief_tenure = "";
     }
+  } else {
+    // 如果没有足够的信息计算，则清空年限
+    formData.value.grassroots_chief_tenure = "";
   }
   
-  // 如果没有足够的信息计算，则清空年限
-  formData.value.grassroots_chief_tenure = "";
+  // 当任基层正职时间改变时，重新计算任基层副职年限
+  calculateGrassrootsViceTenure();
 }
 
 // 计算任中层助理年限
@@ -962,12 +965,11 @@ function calculateMidlevelAssistantTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.midlevel_assistant_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.midlevel_assistant_tenure = "";
     }
-  }
-  
-  // 如果没有任中层副职时间，则使用当前时间减去任中层助理层级时间
-  if (formData.value.midlevel_assistant_date) {
+  } else if (formData.value.midlevel_assistant_date) {
+    // 如果没有任中层副职时间，则使用当前时间减去任中层助理层级时间
     const assistantDate = formData.value.midlevel_assistant_date instanceof Date 
       ? formData.value.midlevel_assistant_date 
       : new Date(formData.value.midlevel_assistant_date);
@@ -980,12 +982,16 @@ function calculateMidlevelAssistantTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.midlevel_assistant_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.midlevel_assistant_tenure = "";
     }
+  } else {
+    // 如果没有足够的信息计算，则清空年限
+    formData.value.midlevel_assistant_tenure = "";
   }
   
-  // 如果没有足够的信息计算，则清空年限
-  formData.value.midlevel_assistant_tenure = "";
+  // 当任中层助理时间改变时，重新计算任基层正职年限
+  calculateGrassrootsChiefTenure();
 }
 
 // 计算任中层副职年限
@@ -1007,12 +1013,11 @@ function calculateMidlevelViceTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.midlevel_vice_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.midlevel_vice_tenure = "";
     }
-  }
-  
-  // 如果没有任中层正职时间，则使用当前时间减去任中层副职时间
-  if (formData.value.midlevel_vice_date) {
+  } else if (formData.value.midlevel_vice_date) {
+    // 如果没有任中层正职时间，则使用当前时间减去任中层副职时间
     const viceDate = formData.value.midlevel_vice_date instanceof Date 
       ? formData.value.midlevel_vice_date 
       : new Date(formData.value.midlevel_vice_date);
@@ -1025,12 +1030,16 @@ function calculateMidlevelViceTenure() {
       const diffMonths = Math.floor(diffDays / 30);
       
       formData.value.midlevel_vice_tenure = `${diffYears}年${diffMonths}月`;
-      return;
+    } else {
+      formData.value.midlevel_vice_tenure = "";
     }
+  } else {
+    // 如果没有足够的信息计算，则清空年限
+    formData.value.midlevel_vice_tenure = "";
   }
   
-  // 如果没有足够的信息计算，则清空年限
-  formData.value.midlevel_vice_tenure = "";
+  // 当任中层副职时间改变时，重新计算任中层助理年限
+  calculateMidlevelAssistantTenure();
 }
 
 // 计算任中层正职年限
@@ -1050,11 +1059,16 @@ function calculateMidlevelChiefTenure() {
       
       formData.value.midlevel_chief_tenure = `${diffYears}年${diffMonths}月`;
       return;
+    } else {
+      formData.value.midlevel_chief_tenure = "";
     }
+  } else {
+    // 如果没有足够的信息计算，则清空年限
+    formData.value.midlevel_chief_tenure = "";
   }
   
-  // 如果没有足够的信息计算，则清空年限
-  formData.value.midlevel_chief_tenure = "";
+  // 当任中层正职时间改变时，重新计算任中层副职年限
+  calculateMidlevelViceTenure();
 }
 
 // 计算同部门任职年限
